@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости для студентов</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        .news-card {
+            background-color: #ffffff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            transition: transform 0.2s ease-in-out;
+        }
+        .news-card:hover {
+            transform: translateY(-5px); /* Slight lift on hover */
+        }
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #2563eb; /* Blue spinner */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-8 px-4">
+
+    <header class="w-full max-w-4xl text-center mb-8">
+        <h1 class="text-4xl font-bold text-gray-800 mb-2">Главные новости для студентов</h1>
+        <p class="text-lg text-gray-600">Будьте в курсе последних событий, советов и возможностей!</p>
+    </header>
+
+    <main class="w-full max-w-4xl flex flex-col items-center">
+        <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
+                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+            <button id="searchButton"
+                    class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Найти новости
+            </button>
+        </div>
+
+        <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-600 text-lg">Загрузка последних новостей...</p>
+        </div>
+
+        <div id="newsContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full hidden">
+            <!-- News articles will be injected here by JavaScript -->
+        </div>
+
+        <div id="errorMessage" class="hidden text-red-600 text-center mt-8 p-4 bg-red-100 border border-red-400 rounded-lg">
+            <p class="font-semibold">Произошла ошибка при загрузке новостей.</p>
+            <p>Пожалуйста, попробуйте обновить страницу или проверьте ваше интернет-соединение.</p>
+        </div>
+    </main>
+
+    <script type="module">
+        // Get references to DOM elements
+        const newsContainer = document.getElementById('newsContainer');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+
+        // Define the backend API URL
+        // Make sure this matches the port your Flask app is running on
+        const BACKEND_API_URL = 'http://localhost:5000/api/news';
+
+        /**
+         * Fetches news articles from the backend API and displays them.
+         * @param {string} query - The search query entered by the user.
+         */
+        async function fetchAndDisplayNews(query = '') {
+            loadingIndicator.classList.remove('hidden'); // Show loading spinner
+            newsContainer.classList.add('hidden');      // Hide news container
+            errorMessage.classList.add('hidden');       // Hide error message
+
+            try {
+                // Construct the URL with the query parameter
+                const url = query ? `${BACKEND_API_URL}?query=${encodeURIComponent(query)}` : BACKEND_API_URL;
+                console.log(`Fetching news from: ${url}`); // For debugging
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    // If response is not OK (e.g., 404, 500), throw an error
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const articles = await response.json();
+
+                if (articles && articles.length > 0) {
+                    newsContainer.innerHTML = ''; // Clear previous news
+                    articles.forEach(article => {
+                        // Create a news card element
+                        const newsCard = document.createElement('div');
+                        newsCard.className = 'news-card p-6 flex flex-col justify-between';
+
+                        // Create the content for the news card
+                        newsCard.innerHTML = `
+                            <div>
+                                <h2 class="text-xl font-semibold text-gray-900 mb-2">${article.source_title || 'Неизвестный источник'}</h2>
+                                <p class="text-gray-700 mb-4">${article.snippet || 'Нажмите, чтобы узнать больше.'}</p>
+                            </div>
+                            <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
+                               class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium transition duration-150 ease-in-out">
+                                Читать далее &rarr;
+                            </a>
+                        `;
+                        newsContainer.appendChild(newsCard); // Add card to container
+                    });
+                    newsContainer.classList.remove('hidden'); // Show news container
+                } else {
+                    errorMessage.classList.remove('hidden'); // Show error if no results
+                    errorMessage.querySelector('p').textContent = `По запросу "${query}" новости не найдены.`;
+                }
+            } catch (error) {
+                console.error("Error fetching news:", error);
+                errorMessage.classList.remove('hidden'); // Show error message on failure
+                errorMessage.querySelector('p').textContent = `Произошла ошибка при загрузке новостей. Убедитесь, что бэкенд запущен по адресу ${BACKEND_API_URL}. Ошибка: ${error.message}`;
+            } finally {
+                loadingIndicator.classList.add('hidden'); // Hide loading spinner
+            }
+        }
+
+        // Event listener for the search button
+        searchButton.addEventListener('click', () => {
+            const query = searchInput.value.trim();
+            fetchAndDisplayNews(query);
+        });
+
+        // Allow searching by pressing Enter in the input field
+        searchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                const query = searchInput.value.trim();
+                fetchAndDisplayNews(query);
+            }
+        });
+
+        // Fetch initial news when the page loads (e.g., all mock news)
+        window.onload = () => fetchAndDisplayNews(''); // Display all news initially
+    </script>
+</body>
+</html>
