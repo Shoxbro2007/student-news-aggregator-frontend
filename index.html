@@ -117,78 +117,14 @@
                 text-align: center;
             }
         }
-
-        /* Logo specific styles */
-        .logo-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            padding: 10px;
-            border-radius: 1rem; /* rounded-xl */
-            background-color: transparent; /* No specific background, let body handle */
-            transition: background-color 0.3s ease;
-        }
-        .logo-svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 0.5rem;
-            transition: fill 0.3s ease, stroke 0.3s ease;
-        }
-        .logo-text {
-            font-size: 2.5rem; /* text-4xl */
-            font-weight: 700; /* font-bold */
-            line-height: 1;
-            color: #1f2937; /* gray-900 */
-            transition: color 0.3s ease;
-        }
-        .dark .logo-text {
-            color: #f9fafb; /* gray-100 */
-        }
-        .logo-subtext {
-            font-size: 1rem; /* text-base */
-            color: #4b5563; /* gray-600 */
-            transition: color 0.3s ease;
-        }
-        .dark .logo-subtext {
-            color: #d1d5db; /* gray-300 */
-        }
-        .logo-icon-fill {
-            fill: #2563eb; /* blue-600 */
-            transition: fill 0.3s ease;
-        }
-        .dark .logo-icon-fill {
-            fill: #60a5fa; /* blue-400 */
-        }
-        .logo-icon-stroke {
-            stroke: #2563eb; /* blue-600 */
-            transition: stroke 0.3s ease;
-        }
-        .dark .logo-icon-stroke {
-            stroke: #60a5fa; /* blue-400 */
-        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <header class="w-full max-w-4xl text-center mb-8 relative">
         <div class="header-content">
-            <!-- Dynamic Logo -->
-            <div class="logo-container">
-                <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Speech bubble/news icon -->
-                    <path class="logo-icon-fill" d="M50 10 C27.9 10 10 27.9 10 50 C10 60.5 14.1 70.1 21.2 77.2 L15 90 L30 84 C39.5 90.5 50 90 50 90 C72.1 90 90 72.1 90 50 C90 27.9 72.1 10 50 10 Z"/>
-                    <!-- Lines inside the bubble (representing news/data) -->
-                    <rect class="logo-icon-fill" x="30" y="35" width="40" height="5" rx="2.5"/>
-                    <rect class="logo-icon-fill" x="30" y="45" width="30" height="5" rx="2.5"/>
-                    <rect class="logo-icon-fill" x="30" y="55" width="35" height="5" rx="2.5"/>
-                </svg>
-                <div class="flex flex-col items-center">
-                    <span id="logoMainText" class="logo-text">SNA</span>
-                    <span id="logoSubText" class="logo-subtext">Student News Aggregator</span>
-                </div>
-            </div>
+            <!-- Your Profile Logo (NSA.jpg) -->
+            <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-20 w-20 rounded-full shadow-lg dark:shadow-xl transition-colors duration-300">
             <div>
                 <h1 class="main-title font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
                 <p class="subtitle text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
@@ -586,6 +522,7 @@
     </script>
 </body>
 </html>
+
 
 
 
