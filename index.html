@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" class="light"> <!-- Default to light theme, 'dark' class will be added by JS -->
+<html lang="ru" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,62 +8,62 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons (moon/sun and categories) -->
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
-        /* Base styles for news card - colors handled by Tailwind dark: classes */
         .news-card {
-            border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden; /* Ensures image corners are rounded with card */
-            opacity: 0; /* Initial state for fade-in animation */
-            animation: fadeIn 0.5s ease-out forwards; /* Apply fade-in animation */
+            overflow: hidden;
+            opacity: 0;
+            animation: fadeIn 0.5s ease-out forwards;
         }
         .news-card:hover {
-            transform: translateY(-5px); /* Slight lift on hover */
+            transform: translateY(-5px);
         }
         .news-card img {
             width: 100%;
-            height: 180px; /* Fixed height for consistency */
-            object-fit: cover; /* Ensures image covers the area without distortion */
-            border-top-left-radius: 0.75rem; /* Match card border radius */
-            border-top-right-radius: 0.75rem; /* Match card border radius */
-            margin-bottom: 1rem; /* Space below image */
+            height: 180px;
+            object-fit: cover;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            margin-bottom: 1rem;
         }
         /* Style for the large card image */
         .news-card.large-card img {
             height: 250px; /* Taller image for the large card */
         }
+        /* Style for medium cards image */
+        .news-card.medium-card img {
+            height: 200px; /* Slightly taller than small, shorter than large */
+        }
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb; /* Blue spinner */
+            border-left-color: #2563eb;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        /* Dark mode for spinner */
         .dark .loading-spinner {
             border-color: rgba(255, 255, 255, 0.1);
-            border-left-color: #63b3ed; /* Lighter blue for dark theme spinner */
+            border-left-color: #63b3ed;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        /* Keyframes for fade-in animation */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Active category button styling - handled by JS */
         .category-button.active {
-            /* These will be set by JS based on theme */
+            /* Handled by JS */
         }
     </style>
 </head>
@@ -75,7 +75,7 @@
         
         <!-- Dark Mode Toggle Button -->
         <button id="themeToggle" class="absolute top-0 right-0 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
-            <i class="fas fa-moon" id="themeIcon"></i> <!-- Default to moon icon for light theme -->
+            <i class="fas fa-moon" id="themeIcon"></i>
         </button>
     </header>
 
@@ -92,7 +92,6 @@
 
         <!-- Category Buttons -->
         <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
-            <!-- Base classes for category buttons. Active/inactive colors handled by JS based on theme. -->
             <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
             <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
             <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
@@ -107,7 +106,6 @@
             <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
         </div>
 
-        <!-- News Container - now uses flexbox for more control over layout -->
         <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
             <!-- News articles will be injected here by JavaScript -->
         </div>
@@ -135,15 +133,14 @@
         const loadMoreButton = document.getElementById('loadMoreButton');
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
-        const htmlElement = document.documentElement; // The <html> tag
+        const htmlElement = document.documentElement;
 
-        let currentQuery = '';    // Current search query
-        let currentCategory = ''; // Current selected category
-        let currentPage = 1;      // Current pagination page
-        let totalResults = 0;     // Total available results
+        let currentQuery = '';
+        let currentCategory = '';
+        let currentPage = 1;
+        let totalResults = 0;
 
-        // Define the backend API URL
-        const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api/news';
+        const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
 
         /**
          * Toggles between light and dark themes.
@@ -162,7 +159,6 @@
                 themeIcon.classList.remove('fa-sun');
                 themeIcon.classList.add('fa-moon');
             }
-            // Update category button styling based on new theme
             updateActiveCategoryButton(currentCategory);
         }
 
@@ -183,22 +179,75 @@
         }
 
         /**
+         * Creates a news card element.
+         * @param {Object} article - The article data.
+         * @param {number} index - The index of the article (for layout).
+         * @returns {HTMLElement} The created news card element.
+         */
+        function createNewsCard(article, index) {
+            const newsCard = document.createElement('div');
+            let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
+            
+            // Apply different layout based on index and current page
+            if (currentPage === 1 && index === 0) {
+                // First card: large (full width)
+                cardClasses += ` w-full md:w-full lg:w-full large-card`;
+            } else if (currentPage === 1 && (index === 1 || index === 2)) {
+                // Next two cards: medium (half width on larger screens)
+                cardClasses += ` w-full md:w-1/2 lg:w-1/2 medium-card`;
+            } else {
+                // All other cards: standard (third width on larger screens)
+                cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
+            }
+            newsCard.className = cardClasses;
+
+            let imageHtml = '';
+            let placeholderSize = '600x400'; // Default placeholder size
+
+            if (currentPage === 1 && index === 0) {
+                placeholderSize = '800x450'; // Large placeholder for the first card
+            } else if (currentPage === 1 && (index === 1 || index === 2)) {
+                placeholderSize = '700x400'; // Medium placeholder for the next two cards
+            }
+
+            if (article.image_url) {
+                imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
+            } else {
+                imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" />`;
+            }
+
+            newsCard.innerHTML = `
+                ${imageHtml}
+                <div>
+                    <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
+                    <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
+                </div>
+                <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
+                   class="inline-block mt-4 font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    Читать далее &rarr;
+                </a>
+            `;
+
+            return newsCard;
+        }
+
+        /**
          * Fetches news articles from the backend API and displays them.
          * @param {boolean} reset - If true, clears existing news and resets page to 1.
          */
         async function fetchAndDisplayNews(reset = true) {
             if (reset) {
-                currentPage = 1; // Reset page to 1 for new search or category change
-                newsContainer.innerHTML = ''; // Clear previous news
-                newsContainer.classList.add('hidden'); // Hide news container
-                loadMoreButton.classList.add('hidden'); // Hide Load More button
+                currentPage = 1;
+                newsContainer.innerHTML = '';
+                newsContainer.classList.add('hidden');
+                loadMoreButton.classList.add('hidden');
             }
 
-            loadingIndicator.classList.remove('hidden'); // Show loading spinner
-            errorMessage.classList.add('hidden');       // Hide error message
+            loadingIndicator.classList.remove('hidden');
+            errorMessage.classList.add('hidden');
 
             try {
-                // Construct the URL with query, category, and page parameters
                 const urlParams = new URLSearchParams();
                 if (currentQuery) {
                     urlParams.append('query', currentQuery);
@@ -206,10 +255,10 @@
                 if (currentCategory) {
                     urlParams.append('category', currentCategory);
                 }
-                urlParams.append('page', currentPage); // Add page parameter
+                urlParams.append('page', currentPage);
                 
-                const url = `${BACKEND_API_URL}?${urlParams.toString()}`;
-                console.log(`Fetching news from: ${url}`); // For debugging
+                const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
+                console.log(`Fetching news from: ${url}`);
 
                 const response = await fetch(url);
 
@@ -223,40 +272,8 @@
                 totalResults = data.totalResults;
 
                 if (articles && articles.length > 0) {
-                    articles.forEach((article, index) => { // Added index to differentiate cards
-                        const newsCard = document.createElement('div');
-                        let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
-                        
-                        // Apply different layout for the first card on the first page
-                        if (currentPage === 1 && index === 0) {
-                            cardClasses += ` w-full md:w-full lg:w-full large-card`; // Occupy full width on all screen sizes
-                        } else {
-                            cardClasses += ` w-full md:w-1/2 lg:w-1/3`; // Standard 2 or 3 column layout
-                        }
-                        newsCard.className = cardClasses;
-
-                        let imageHtml = '';
-                        // Use a larger placeholder for the large card if no image
-                        const placeholderSize = (currentPage === 1 && index === 0) ? '800x450' : '600x400';
-
-                        if (article.image_url) {
-                            imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" 
-                                         onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
-                        } else {
-                            imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" />`;
-                        }
-
-                        newsCard.innerHTML = `
-                            ${imageHtml}
-                            <div>
-                                <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
-                                <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
-                            </div>
-                            <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
-                               class="inline-block mt-4 font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                                Читать далее &rarr;
-                            </a>
-                        `;
+                    articles.forEach((article, index) => {
+                        const newsCard = createNewsCard(article, index); // No isFavorite flag needed
                         newsContainer.appendChild(newsCard);
                     });
                     newsContainer.classList.remove('hidden');
@@ -290,77 +307,66 @@
             const isDark = htmlElement.classList.contains('dark');
 
             buttons.forEach(button => {
-                // Remove all active/theme-specific background colors first
                 button.classList.remove('active', 'bg-blue-500', 'bg-blue-600', 'bg-gray-600', 'bg-gray-800');
                 
                 if (button.dataset.category === selectedCategory) {
                     button.classList.add('active');
                     if (isDark) {
-                        button.classList.add('bg-gray-800', 'text-gray-100'); // Dark active background and light text
-                        button.classList.remove('text-white'); // Ensure no conflicting text color
+                        button.classList.add('bg-gray-800', 'text-gray-100');
                     } else {
-                        button.classList.add('bg-blue-600', 'text-white'); // Light active background and white text
+                        button.classList.add('bg-blue-600', 'text-white');
                     }
                 } else {
                     if (isDark) {
-                        button.classList.add('bg-gray-600', 'text-gray-100'); // Dark inactive background and light text
-                        button.classList.remove('text-white');
+                        button.classList.add('bg-gray-600', 'text-gray-100');
                     } else {
-                        button.classList.add('bg-blue-500', 'text-white'); // Light inactive background and white text
+                        button.classList.add('bg-blue-500', 'text-white');
                     }
                 }
             });
         }
 
-        // Event listener for the search button
+        // Event listeners
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
-            currentCategory = ''; // Clear category when searching
-            updateActiveCategoryButton(currentCategory); // Update button styling
-            fetchAndDisplayNews(true); // Load news, resetting current ones
+            currentCategory = '';
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true);
         });
 
-        // Allow searching by pressing Enter in the input field
         searchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 currentQuery = searchInput.value.trim();
-                currentCategory = ''; // Clear category when searching
-                updateActiveCategoryButton(currentCategory); // Update button styling
-                fetchAndDisplayNews(true); // Load news, resetting current ones
+                currentCategory = '';
+                updateActiveCategoryButton(currentCategory);
+                fetchAndDisplayNews(true);
             }
         });
 
-        // Event listener for category buttons
         categoryButtonsContainer.addEventListener('click', (event) => {
-            if (event.target.classList.contains('category-button')) {
-                currentCategory = event.target.dataset.category;
-                currentQuery = ''; // Clear search query when category is selected
-                searchInput.value = ''; // Clear search input field
-                updateActiveCategoryButton(currentCategory); // Update button styling
-                fetchAndDisplayNews(true); // Load news for the selected category, resetting current ones
+            if (event.target.closest('.category-button')) {
+                const button = event.target.closest('.category-button');
+                currentCategory = button.dataset.category;
+                currentQuery = '';
+                searchInput.value = '';
+                updateActiveCategoryButton(currentCategory);
+                fetchAndDisplayNews(true);
             }
         });
 
-        // Event listener for Load More button
         loadMoreButton.addEventListener('click', () => {
-            currentPage++; // Increment page number
-            fetchAndDisplayNews(false); // Load more news, not resetting current ones
+            currentPage++;
+            fetchAndDisplayNews(false);
         });
 
-        // Event listener for theme toggle button
         themeToggle.addEventListener('click', toggleTheme);
 
-        // Fetch initial news and apply saved theme when the page loads
+        // Initial load
         window.onload = () => {
-            applySavedTheme(); // Apply theme preference first
-            updateActiveCategoryButton(''); // Set "Все" as active initially
-            fetchAndDisplayNews(true); // Load initial news
+            applySavedTheme();
+            fetchAndDisplayNews(true);
         };
     </script>
 </body>
 </html>
-
-
-
-
 
