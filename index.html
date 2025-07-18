@@ -232,12 +232,22 @@
         <!-- News Section (now the only main section) -->
         <section id="newsSection" class="w-full flex flex-col items-center">
             <!-- Search Input and Button -->
-            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <div class="w-full max-w-xl mb-4 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
                        class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
                 <button id="searchButton"
                         class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                     Найти новости
+                </button>
+            </div>
+
+            <!-- Author Search Input and Button -->
+            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="authorSearchInput" placeholder="Найти по автору (например, 'Иван Иванов')"
+                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                <button id="authorSearchButton"
+                        class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Найти автора
                 </button>
             </div>
 
@@ -319,6 +329,8 @@
         const errorText = document.getElementById('errorText');
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
+        const authorSearchInput = document.getElementById('authorSearchInput'); // New: Author search input
+        const authorSearchButton = document.getElementById('authorSearchButton'); // New: Author search button
         const fromDateInput = document.getElementById('fromDate');
         const toDateInput = document.getElementById('toDate');
         const categoryButtonsContainer = document.getElementById('categoryButtons');
@@ -336,6 +348,7 @@
 
         let currentQuery = '';
         let currentCategory = '';
+        let currentAuthor = ''; // New: To store current author search
         let currentPage = 1;
         let totalResults = 0;
         let allSources = [];
@@ -514,6 +527,9 @@
                 if (currentCategory) {
                     urlParams.append('category', currentCategory);
                 }
+                if (currentAuthor) { // New: Add author parameter
+                    urlParams.append('author', currentAuthor);
+                }
                 urlParams.append('page', currentPage);
                 
                 if (fromDateInput.value) {
@@ -641,6 +657,8 @@
             // Clear other filters when sources are applied
             currentQuery = '';
             searchInput.value = '';
+            currentAuthor = ''; // New: Clear author when sources are applied
+            authorSearchInput.value = ''; // New: Clear author input
             currentCategory = '';
             fromDateInput.value = '';
             toDateInput.value = '';
@@ -677,7 +695,9 @@
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            selectedSourceIds = []; // Clear sources when searching by query
+            currentAuthor = ''; // Clear author when searching by query
+            authorSearchInput.value = ''; // Clear author input
+            selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -686,7 +706,36 @@
             if (event.key === 'Enter') {
                 currentQuery = searchInput.value.trim();
                 currentCategory = '';
-                selectedSourceIds = []; // Clear sources when searching by query
+                currentAuthor = ''; // Clear author when searching by query
+                authorSearchInput.value = ''; // Clear author input
+                selectedSourceIds = []; 
+                updateActiveCategoryButton(currentCategory);
+                fetchAndDisplayNews(true);
+            }
+        });
+
+        // New: Author search event listeners
+        authorSearchButton.addEventListener('click', () => {
+            currentAuthor = authorSearchInput.value.trim();
+            currentQuery = ''; // Clear general query when searching by author
+            searchInput.value = ''; // Clear general search input
+            currentCategory = '';
+            selectedSourceIds = [];
+            fromDateInput.value = ''; // Clear date inputs
+            toDateInput.value = '';   // Clear date inputs
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true);
+        });
+
+        authorSearchInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                currentAuthor = authorSearchInput.value.trim();
+                currentQuery = ''; // Clear general query when searching by author
+                searchInput.value = ''; // Clear general search input
+                currentCategory = '';
+                selectedSourceIds = [];
+                fromDateInput.value = ''; // Clear date inputs
+                toDateInput.value = '';   // Clear date inputs
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -695,7 +744,9 @@
         fromDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            selectedSourceIds = []; // Clear sources when filtering by date
+            currentAuthor = ''; // Clear author when filtering by date
+            authorSearchInput.value = ''; // Clear author input
+            selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -703,7 +754,9 @@
         toDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            selectedSourceIds = []; // Clear sources when filtering by date
+            currentAuthor = ''; // Clear author when filtering by date
+            authorSearchInput.value = ''; // Clear author input
+            selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -714,6 +767,8 @@
                 currentCategory = button.dataset.category;
                 currentQuery = '';
                 searchInput.value = '';
+                currentAuthor = ''; // Clear author when category is selected
+                authorSearchInput.value = ''; // Clear author input
                 fromDateInput.value = '';
                 toDateInput.value = '';
                 selectedSourceIds = [];
@@ -748,6 +803,7 @@
     </script>
 </body>
 </html>
+
 
 
 
