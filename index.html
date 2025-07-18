@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="light"> <!-- Default to light theme, 'dark' class will be added by JS -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +8,68 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons (moon/sun) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Light gray background */
+            transition: background-color 0.3s ease; /* Smooth transition for theme change */
         }
-        .news-card {
+        /* Light theme styles */
+        body.light {
+            background-color: #f0f2f5; /* Light gray background */
+            color: #1f2937; /* Default dark text */
+        }
+        .news-card.light {
             background-color: #ffffff;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .news-card.light h2 {
+            color: #1f2937; /* Dark text for title */
+        }
+        .news-card.light p {
+            color: #4b5563; /* Gray text for snippet */
+        }
+        .news-card.light a {
+            color: #2563eb; /* Blue text for link */
+        }
+        .category-button.light {
+            background-color: #3b82f6; /* Blue for category buttons */
+            color: #ffffff;
+        }
+        .category-button.light.active {
+            background-color: #1a4a9c; /* Darker blue for active category */
+        }
+
+        /* Dark theme styles */
+        body.dark {
+            background-color: #1a202c; /* Dark background */
+            color: #e2e8f0; /* Light text */
+        }
+        .news-card.dark {
+            background-color: #2d3748; /* Darker card background */
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        .news-card.dark h2 {
+            color: #e2e8f0; /* Light text for title */
+        }
+        .news-card.dark p {
+            color: #a0aec0; /* Lighter gray text for snippet */
+        }
+        .news-card.dark a {
+            color: #63b3ed; /* Lighter blue text for link */
+        }
+        .category-button.dark {
+            background-color: #4a5568; /* Darker gray for category buttons */
+            color: #e2e8f0;
+        }
+        .category-button.dark.active {
+            background-color: #2d3748; /* Even darker for active category */
+        }
+
+        .news-card {
             border-radius: 0.75rem; /* rounded-xl */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
-            transition: transform 0.2s ease-in-out;
+            transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden; /* Ensures image corners are rounded with card */
         }
         .news-card:hover {
@@ -39,27 +91,33 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
+        .dark .loading-spinner {
+            border-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #63b3ed; /* Lighter blue for dark theme spinner */
+        }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        .category-button.active {
-            background-color: #1a4a9c; /* Darker blue for active category */
         }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4">
 
-    <header class="w-full max-w-4xl text-center mb-8">
-        <h1 class="text-4xl font-bold text-gray-800 mb-2">Главные новости для студентов</h1>
-        <p class="text-lg text-gray-600">Будьте в курсе последних событий, советов и возможностей!</p>
+    <header class="w-full max-w-4xl text-center mb-8 relative">
+        <h1 class="text-4xl font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
+        <p class="text-lg text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
+        
+        <!-- Dark Mode Toggle Button -->
+        <button id="themeToggle" class="absolute top-0 right-0 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+            <i class="fas fa-moon" id="themeIcon"></i> <!-- Default to moon icon for light theme -->
+        </button>
     </header>
 
     <main class="w-full max-w-4xl flex flex-col items-center">
         <!-- Search Input and Button -->
         <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
             <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
-                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800">
+                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
             <button id="searchButton"
                     class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                 Найти новости
@@ -68,18 +126,18 @@
 
         <!-- Category Buttons -->
         <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="">Все</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="technology">Технологии</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="science">Наука</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="sports">Спорт</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="health">Здоровье</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="business">Бизнес</button>
-            <button class="category-button px-4 py-2 bg-blue-500 text-white font-medium rounded-full hover:bg-blue-600 transition duration-150 ease-in-out" data-category="entertainment">Развлечения</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="">Все</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="technology">Технологии</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="science">Наука</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="sports">Спорт</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="health">Здоровье</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="business">Бизнес</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out bg-blue-500 text-white dark:bg-gray-600 dark:text-white hover:bg-blue-600 dark:hover:bg-gray-700" data-category="entertainment">Развлечения</button>
         </div>
 
         <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
             <div class="loading-spinner mb-4"></div>
-            <p class="text-gray-600 text-lg">Загрузка последних новостей...</p>
+            <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
         </div>
 
         <div id="newsContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full hidden">
@@ -92,7 +150,7 @@
             Загрузить больше
         </button>
 
-        <div id="errorMessage" class="hidden text-red-600 text-center mt-8 p-4 bg-red-100 border border-red-400 rounded-lg">
+        <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
             <p class="font-semibold">Произошла ошибка при загрузке новостей.</p>
             <p>Пожалуйста, попробуйте обновить страницу или проверьте ваше интернет-соединение.</p>
         </div>
@@ -107,6 +165,9 @@
         const searchButton = document.getElementById('searchButton');
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const loadMoreButton = document.getElementById('loadMoreButton');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlElement = document.documentElement; // The <html> tag
 
         let currentQuery = '';    // Current search query
         let currentCategory = ''; // Current selected category
@@ -115,6 +176,95 @@
 
         // Define the backend API URL
         const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api/news';
+
+        /**
+         * Toggles between light and dark themes.
+         */
+        function toggleTheme() {
+            if (htmlElement.classList.contains('light')) {
+                htmlElement.classList.remove('light');
+                htmlElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                htmlElement.classList.remove('dark');
+                htmlElement.classList.add('light');
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            // Update card and button classes based on new theme
+            updateThemeSpecificClasses();
+        }
+
+        /**
+         * Applies the saved theme preference on page load.
+         */
+        function applySavedTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                htmlElement.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                htmlElement.classList.add('light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            // Apply initial theme-specific classes
+            updateThemeSpecificClasses();
+        }
+
+        /**
+         * Updates classes on news cards and category buttons based on current theme.
+         */
+        function updateThemeSpecificClasses() {
+            const isDark = htmlElement.classList.contains('dark');
+            const newsCards = newsContainer.querySelectorAll('.news-card');
+            const categoryButtons = categoryButtonsContainer.querySelectorAll('.category-button');
+
+            newsCards.forEach(card => {
+                if (isDark) {
+                    card.classList.remove('light');
+                    card.classList.add('dark');
+                    card.querySelector('h2').classList.remove('text-gray-900');
+                    card.querySelector('h2').classList.add('text-e2e8f0'); // Light text for dark theme
+                    card.querySelector('p').classList.remove('text-gray-700');
+                    card.querySelector('p').classList.add('text-a0aec0'); // Lighter gray text for dark theme
+                    card.querySelector('a').classList.remove('text-blue-600', 'hover:text-blue-800');
+                    card.querySelector('a').classList.add('text-63b3ed', 'hover:text-blue-400'); // Lighter blue for dark theme link
+                } else {
+                    card.classList.remove('dark');
+                    card.classList.add('light');
+                    card.querySelector('h2').classList.remove('text-e2e8f0');
+                    card.querySelector('h2').classList.add('text-gray-900'); // Dark text for light theme
+                    card.querySelector('p').classList.remove('text-a0aec0');
+                    card.querySelector('p').classList.add('text-gray-700'); // Gray text for light theme
+                    card.querySelector('a').classList.remove('text-63b3ed', 'hover:text-blue-400');
+                    card.querySelector('a').classList.add('text-blue-600', 'hover:text-blue-800'); // Blue for light theme link
+                }
+            });
+
+            categoryButtons.forEach(button => {
+                if (isDark) {
+                    button.classList.remove('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                    button.classList.add('bg-gray-600', 'text-white', 'hover:bg-gray-700');
+                    if (button.classList.contains('active')) {
+                        button.classList.remove('bg-blue-500'); // Remove light active background
+                        button.classList.add('bg-gray-800'); // Add dark active background
+                    }
+                } else {
+                    button.classList.remove('bg-gray-600', 'text-white', 'hover:bg-gray-700');
+                    button.classList.add('bg-blue-500', 'text-white', 'hover:bg-blue-600');
+                    if (button.classList.contains('active')) {
+                        button.classList.remove('bg-gray-800'); // Remove dark active background
+                        button.classList.add('bg-blue-600'); // Add light active background
+                    }
+                }
+            });
+        }
+
 
         /**
          * Fetches news articles from the backend API and displays them.
@@ -161,7 +311,8 @@
                     articles.forEach(article => {
                         // Create a news card element
                         const newsCard = document.createElement('div');
-                        newsCard.className = 'news-card p-6 flex flex-col justify-between';
+                        // Apply theme classes based on current theme
+                        newsCard.className = `news-card p-6 flex flex-col justify-between ${htmlElement.classList.contains('dark') ? 'dark' : 'light'}`;
 
                         // Add image if available
                         let imageHtml = '';
@@ -178,11 +329,11 @@
                         newsCard.innerHTML = `
                             ${imageHtml}
                             <div>
-                                <h2 class="text-xl font-semibold text-gray-900 mb-2">${article.source_title || 'Неизвестный источник'}</h2>
-                                <p class="text-gray-700 mb-4">${article.snippet || 'Нет описания.'}</p>
+                                <h2 class="text-xl font-semibold mb-2 ${htmlElement.classList.contains('dark') ? 'text-e2e8f0' : 'text-gray-900'}">${article.source_title || 'Неизвестный источник'}</h2>
+                                <p class="mb-4 ${htmlElement.classList.contains('dark') ? 'text-a0aec0' : 'text-gray-700'}">${article.snippet || 'Нет описания.'}</p>
                             </div>
                             <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
-                               class="inline-block mt-4 text-blue-600 hover:text-blue-800 font-medium transition duration-150 ease-in-out">
+                               class="inline-block mt-4 font-medium transition duration-150 ease-in-out ${htmlElement.classList.contains('dark') ? 'text-63b3ed hover:text-blue-400' : 'text-blue-600 hover:text-blue-800'}">
                                 Читать далее &rarr;
                             </a>
                         `;
@@ -191,8 +342,6 @@
                     newsContainer.classList.remove('hidden'); // Show news container
 
                     // Show Load More button if there are more results
-                    // News API usually returns a maximum of 1000 articles for free accounts,
-                    // and pageSize is 20 by default.
                     if (newsContainer.children.length < totalResults) {
                         loadMoreButton.classList.remove('hidden');
                     } else {
@@ -219,11 +368,25 @@
         // Function to update active category button styling
         function updateActiveCategoryButton(selectedCategory) {
             const buttons = categoryButtonsContainer.querySelectorAll('.category-button');
+            const isDark = htmlElement.classList.contains('dark');
+
             buttons.forEach(button => {
                 if (button.dataset.category === selectedCategory) {
                     button.classList.add('active');
+                    if (isDark) {
+                        button.classList.add('bg-gray-800'); // Dark active background
+                        button.classList.remove('bg-gray-600', 'bg-blue-500');
+                    } else {
+                        button.classList.add('bg-blue-600'); // Light active background
+                        button.classList.remove('bg-blue-500', 'bg-gray-600');
+                    }
                 } else {
-                    button.classList.remove('active');
+                    button.classList.remove('active', 'bg-blue-600', 'bg-gray-800');
+                    if (isDark) {
+                        button.classList.add('bg-gray-600'); // Dark inactive background
+                    } else {
+                        button.classList.add('bg-blue-500'); // Light inactive background
+                    }
                 }
             });
         }
@@ -239,8 +402,7 @@
         // Allow searching by pressing Enter in the input field
         searchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                const query = searchInput.value.trim();
-                currentQuery = query; // Update currentQuery
+                currentQuery = searchInput.value.trim();
                 currentCategory = ''; // Clear category when searching
                 updateActiveCategoryButton(currentCategory); // Update button styling
                 fetchAndDisplayNews(true); // Load news, resetting current ones
@@ -264,12 +426,17 @@
             fetchAndDisplayNews(false); // Load more news, not resetting current ones
         });
 
-        // Fetch initial news when the page loads (default to no query and no category)
+        // Event listener for theme toggle button
+        themeToggle.addEventListener('click', toggleTheme);
+
+        // Fetch initial news and apply saved theme when the page loads
         window.onload = () => {
+            applySavedTheme(); // Apply theme preference first
             updateActiveCategoryButton(''); // Set "Все" as active initially
             fetchAndDisplayNews(true); // Load initial news
         };
     </script>
 </body>
 </html>
+
 
