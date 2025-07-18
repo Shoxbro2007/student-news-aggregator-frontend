@@ -128,6 +128,17 @@
             </button>
         </div>
 
+        <!-- Date Filter Inputs -->
+        <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+            <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
+            <input type="date" id="fromDate"
+                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+            
+            <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
+            <input type="date" id="toDate"
+                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+        </div>
+
         <!-- Category Buttons -->
         <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
             <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
@@ -167,6 +178,8 @@
         const errorMessage = document.getElementById('errorMessage');
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
+        const fromDateInput = document.getElementById('fromDate'); // New: From Date input
+        const toDateInput = document.getElementById('toDate');     // New: To Date input
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const loadMoreButton = document.getElementById('loadMoreButton');
         const themeToggle = document.getElementById('themeToggle');
@@ -234,12 +247,20 @@
                     window.open(shareUrl, '_blank');
                     break;
                 case 'copy':
-                    navigator.clipboard.writeText(url).then(() => {
+                    // Use document.execCommand('copy') for better compatibility in iframes
+                    const tempInput = document.createElement('textarea');
+                    tempInput.value = url;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    try {
+                        document.execCommand('copy');
                         alert('Ссылка скопирована в буфер обмена!');
-                    }).catch(err => {
+                    } catch (err) {
                         console.error('Не удалось скопировать текст: ', err);
                         alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + url);
-                    });
+                    } finally {
+                        document.body.removeChild(tempInput);
+                    }
                     break;
             }
         }
@@ -347,6 +368,14 @@
                 }
                 urlParams.append('page', currentPage);
                 
+                // New: Add date parameters if they are set
+                if (fromDateInput.value) {
+                    urlParams.append('from_date', fromDateInput.value);
+                }
+                if (toDateInput.value) {
+                    urlParams.append('to_date', toDateInput.value);
+                }
+
                 const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
                 console.log(`Fetching news from: ${url}`);
 
@@ -419,7 +448,7 @@
         // Event listeners
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
-            currentCategory = '';
+            currentCategory = ''; // Clear category when searching
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -427,18 +456,35 @@
         searchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 currentQuery = searchInput.value.trim();
-                currentCategory = '';
+                currentCategory = ''; // Clear category when searching
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
+        });
+
+        // New: Event listeners for date inputs to trigger search
+        fromDateInput.addEventListener('change', () => {
+            currentQuery = searchInput.value.trim(); // Keep current query
+            currentCategory = ''; // Clear category
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true);
+        });
+
+        toDateInput.addEventListener('change', () => {
+            currentQuery = searchInput.value.trim(); // Keep current query
+            currentCategory = ''; // Clear category
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true);
         });
 
         categoryButtonsContainer.addEventListener('click', (event) => {
             if (event.target.closest('.category-button')) {
                 const button = event.target.closest('.category-button');
                 currentCategory = button.dataset.category;
-                currentQuery = '';
-                searchInput.value = '';
+                currentQuery = ''; // Clear search query when category is selected
+                searchInput.value = ''; // Clear search input field
+                fromDateInput.value = ''; // New: Clear date inputs when category is selected
+                toDateInput.value = '';   // New: Clear date inputs when category is selected
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -459,3 +505,4 @@
     </script>
 </body>
 </html>
+
