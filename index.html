@@ -262,8 +262,22 @@
                        class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
             </div>
 
-            <!-- Source Selection Button -->
-            <div class="w-full max-w-xl mb-8 flex justify-center">
+            <!-- Language and Source Selection Buttons -->
+            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
+                <div class="flex items-center space-x-2">
+                    <label for="languageSelect" class="text-gray-700 dark:text-gray-300">Язык:</label>
+                    <select id="languageSelect" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="zh">中文</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
                 <button id="selectSourcesButton"
                         class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
                     Выбрать источники
@@ -329,10 +343,11 @@
         const errorText = document.getElementById('errorText');
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
-        const authorSearchInput = document.getElementById('authorSearchInput'); // New: Author search input
-        const authorSearchButton = document.getElementById('authorSearchButton'); // New: Author search button
+        const authorSearchInput = document.getElementById('authorSearchInput');
+        const authorSearchButton = document.getElementById('authorSearchButton');
         const fromDateInput = document.getElementById('fromDate');
         const toDateInput = document.getElementById('toDate');
+        const languageSelect = document.getElementById('languageSelect'); // New: Language select element
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const loadMoreButton = document.getElementById('loadMoreButton');
         const themeToggle = document.getElementById('themeToggle');
@@ -348,7 +363,8 @@
 
         let currentQuery = '';
         let currentCategory = '';
-        let currentAuthor = ''; // New: To store current author search
+        let currentAuthor = '';
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru'; // New: Load language from localStorage, default to 'ru'
         let currentPage = 1;
         let totalResults = 0;
         let allSources = [];
@@ -527,9 +543,10 @@
                 if (currentCategory) {
                     urlParams.append('category', currentCategory);
                 }
-                if (currentAuthor) { // New: Add author parameter
+                if (currentAuthor) {
                     urlParams.append('author', currentAuthor);
                 }
+                urlParams.append('language', currentLanguage); // New: Add language parameter
                 urlParams.append('page', currentPage);
                 
                 if (fromDateInput.value) {
@@ -657,8 +674,8 @@
             // Clear other filters when sources are applied
             currentQuery = '';
             searchInput.value = '';
-            currentAuthor = ''; // New: Clear author when sources are applied
-            authorSearchInput.value = ''; // New: Clear author input
+            currentAuthor = '';
+            authorSearchInput.value = '';
             currentCategory = '';
             fromDateInput.value = '';
             toDateInput.value = '';
@@ -695,8 +712,8 @@
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            currentAuthor = ''; // Clear author when searching by query
-            authorSearchInput.value = ''; // Clear author input
+            currentAuthor = '';
+            authorSearchInput.value = '';
             selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
@@ -706,23 +723,23 @@
             if (event.key === 'Enter') {
                 currentQuery = searchInput.value.trim();
                 currentCategory = '';
-                currentAuthor = ''; // Clear author when searching by query
-                authorSearchInput.value = ''; // Clear author input
+                currentAuthor = '';
+                authorSearchInput.value = '';
                 selectedSourceIds = []; 
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
         });
 
-        // New: Author search event listeners
+        // Author search event listeners
         authorSearchButton.addEventListener('click', () => {
             currentAuthor = authorSearchInput.value.trim();
-            currentQuery = ''; // Clear general query when searching by author
-            searchInput.value = ''; // Clear general search input
+            currentQuery = '';
+            searchInput.value = '';
             currentCategory = '';
             selectedSourceIds = [];
-            fromDateInput.value = ''; // Clear date inputs
-            toDateInput.value = '';   // Clear date inputs
+            fromDateInput.value = '';
+            toDateInput.value = '';
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -730,12 +747,12 @@
         authorSearchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
                 currentAuthor = authorSearchInput.value.trim();
-                currentQuery = ''; // Clear general query when searching by author
-                searchInput.value = ''; // Clear general search input
+                currentQuery = '';
+                searchInput.value = '';
                 currentCategory = '';
                 selectedSourceIds = [];
-                fromDateInput.value = ''; // Clear date inputs
-                toDateInput.value = '';   // Clear date inputs
+                fromDateInput.value = '';
+                toDateInput.value = '';
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -744,8 +761,8 @@
         fromDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            currentAuthor = ''; // Clear author when filtering by date
-            authorSearchInput.value = ''; // Clear author input
+            currentAuthor = '';
+            authorSearchInput.value = '';
             selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
@@ -754,11 +771,28 @@
         toDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
-            currentAuthor = ''; // Clear author when filtering by date
-            authorSearchInput.value = ''; // Clear author input
+            currentAuthor = '';
+            authorSearchInput.value = '';
             selectedSourceIds = []; 
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
+        });
+
+        // New: Language select event listener
+        languageSelect.addEventListener('change', () => {
+            currentLanguage = languageSelect.value;
+            localStorage.setItem('selectedLanguage', currentLanguage); // Save selected language
+            // Clear other filters when language is changed
+            currentQuery = '';
+            searchInput.value = '';
+            currentAuthor = '';
+            authorSearchInput.value = '';
+            currentCategory = '';
+            fromDateInput.value = '';
+            toDateInput.value = '';
+            selectedSourceIds = [];
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true); // Re-fetch news with new language
         });
 
         categoryButtonsContainer.addEventListener('click', (event) => {
@@ -767,8 +801,8 @@
                 currentCategory = button.dataset.category;
                 currentQuery = '';
                 searchInput.value = '';
-                currentAuthor = ''; // Clear author when category is selected
-                authorSearchInput.value = ''; // Clear author input
+                currentAuthor = '';
+                authorSearchInput.value = '';
                 fromDateInput.value = '';
                 toDateInput.value = '';
                 selectedSourceIds = [];
@@ -797,12 +831,15 @@
         // Initial load
         window.onload = () => {
             applySavedTheme();
+            // Set initial language select value based on localStorage or default
+            languageSelect.value = currentLanguage; 
             fetchSources(); // Fetch sources when page loads
             fetchAndDisplayNews(true); // Start on the news section
         };
     </script>
 </body>
 </html>
+
 
 
 
