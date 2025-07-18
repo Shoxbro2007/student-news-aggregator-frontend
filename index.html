@@ -284,9 +284,10 @@
             Загрузить больше
         </button>
 
+        <!-- Updated Error Message Container -->
         <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
-            <p class="font-semibold">Произошла ошибка при загрузке новостей.</p>
-            <p>Пожалуйста, попробуйте обновить страницу или проверьте ваше интернет-соединение.</p>
+            <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
+            <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
         </div>
     </main>
 
@@ -312,6 +313,7 @@
         const newsContainer = document.getElementById('newsContainer');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText'); // New: Specific error message element
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
         const fromDateInput = document.getElementById('fromDate');
@@ -443,10 +445,10 @@
             }
 
             if (article.image_url) {
-                imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" 
+                imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" loading="lazy"
                              onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
             } else {
-                imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" />`;
+                imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
             }
 
             newsCard.innerHTML = `
@@ -500,7 +502,8 @@
             }
 
             loadingIndicator.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
+            errorMessage.classList.add('hidden'); // Hide general error message initially
+            errorText.textContent = ''; // Clear specific error text
 
             try {
                 const urlParams = new URLSearchParams();
@@ -518,7 +521,6 @@
                 if (toDateInput.value) {
                     urlParams.append('to_date', toDateInput.value);
                 }
-                // ДОБАВЛЕНО: Добавляем выбранные источники
                 if (selectedSourceIds.length > 0) {
                     urlParams.append('sources', selectedSourceIds.join(','));
                 }
@@ -529,8 +531,9 @@
                 const response = await fetch(url);
 
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+                    const errorJson = await response.json(); // Try to parse JSON error
+                    const apiError = errorJson.error || `HTTP error! Status: ${response.status}`;
+                    throw new Error(apiError);
                 }
 
                 const data = await response.json();
@@ -551,8 +554,9 @@
                     }
 
                 } else if (reset) {
+                    // Specific message for no results found with current filters
                     errorMessage.classList.remove('hidden');
-                    errorMessage.querySelector('p').textContent = `По запросу "${currentQuery}" или в категории "${currentCategory}" новости не найдены.`;
+                    errorText.textContent = `По вашему запросу или выбранным фильтрам новости не найдены. Попробуйте изменить критерии поиска или фильтрации.`;
                     loadMoreButton.classList.add('hidden');
                 } else {
                     loadMoreButton.classList.add('hidden');
@@ -560,7 +564,8 @@
             } catch (error) {
                 console.error("Error fetching news:", error);
                 errorMessage.classList.remove('hidden');
-                errorMessage.querySelector('p').textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
+                // Display a more specific error if available, otherwise a generic one
+                errorText.textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
                 loadMoreButton.classList.add('hidden');
             } finally {
                 loadingIndicator.classList.add('hidden');
@@ -581,7 +586,7 @@
                 displaySourcesInModal();
             } catch (error) {
                 console.error("Error fetching sources:", error);
-                sourcesListContainer.innerHTML = `<p class="text-red-500">Не удалось загрузить источники: ${error.message}</p>`;
+                sourcesListContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Не удалось загрузить источники: ${error.message}</p>`;
             }
         }
 
@@ -745,6 +750,7 @@
     </script>
 </body>
 </html>
+
 
 
 
