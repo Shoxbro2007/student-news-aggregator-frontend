@@ -8,12 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons (moon/sun) -->
+    <!-- Font Awesome for icons (moon/sun and categories) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            /* Tailwind handles background and text color based on html.dark/light */
             transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition for theme change */
         }
         /* Base styles for news card - colors handled by Tailwind dark: classes */
@@ -22,6 +21,8 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
             transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden; /* Ensures image corners are rounded with card */
+            opacity: 0; /* Initial state for fade-in animation */
+            animation: fadeIn 0.5s ease-out forwards; /* Apply fade-in animation */
         }
         .news-card:hover {
             transform: translateY(-5px); /* Slight lift on hover */
@@ -50,6 +51,11 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        /* Keyframes for fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         /* Active category button styling - handled by JS */
         .category-button.active {
@@ -83,13 +89,13 @@
         <!-- Category Buttons -->
         <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
             <!-- Base classes for category buttons. Active/inactive colors handled by JS based on theme. -->
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="">Все</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="technology">Технологии</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="science">Наука</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="sports">Спорт</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="health">Здоровье</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="business">Бизнес</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-category="entertainment">Развлечения</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports"><i class="fas fa-futbol mr-2"></i>Спорт</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
+            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment"><i class="fas fa-film mr-2"></i>Развлечения</button>
         </div>
 
         <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
@@ -339,6 +345,7 @@
     </script>
 </body>
 </html>
+
 
 
 
