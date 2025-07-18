@@ -20,8 +20,9 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
             overflow: hidden;
-            opacity: 0;
-            animation: fadeIn 0.5s ease-out forwards;
+            opacity: 0; /* Initial state for fade-in animation */
+            animation: fadeIn 0.5s ease-out forwards; /* Apply fade-in animation */
+            animation-delay: var(--animation-delay); /* Staggered animation */
         }
         .news-card:hover {
             transform: translateY(-5px);
@@ -58,6 +59,7 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        /* Keyframes for fade-in animation with slight translateY */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -65,13 +67,49 @@
         .category-button.active {
             /* Handled by JS */
         }
+        .share-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            border-radius: 9999px; /* rounded-full */
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+        .share-button:hover {
+            transform: translateY(-2px);
+        }
+        .share-button i {
+            font-size: 1.25rem; /* text-xl */
+        }
+        .share-button.twitter:hover { background-color: #1DA1F2; color: white; }
+        .share-button.facebook:hover { background-color: #1877F2; color: white; }
+        .share-button.copy:hover { background-color: #6B7280; color: white; } /* Gray-500 */
+
+        /* General UI Polish */
+        .main-title {
+            font-size: 2.75rem; /* Slightly larger title */
+            line-height: 1.2;
+        }
+        .subtitle {
+            font-size: 1.15rem; /* Slightly larger subtitle */
+        }
+        .news-card h2 {
+            font-size: 1.3rem; /* Slightly larger card title */
+            line-height: 1.4;
+        }
+        .news-card p {
+            font-size: 0.95rem; /* Slightly smaller snippet for better fit */
+        }
+        .read-more-link {
+            font-size: 0.9rem; /* Slightly smaller read more link */
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <header class="w-full max-w-4xl text-center mb-8 relative">
-        <h1 class="text-4xl font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
-        <p class="text-lg text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
+        <h1 class="main-title font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
+        <p class="subtitle text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
         
         <!-- Dark Mode Toggle Button -->
         <button id="themeToggle" class="absolute top-0 right-0 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
@@ -179,9 +217,37 @@
         }
 
         /**
+         * Handles sharing an article.
+         * @param {string} platform - 'twitter', 'facebook', or 'copy'.
+         * @param {string} url - The URL of the article.
+         * @param {string} title - The title/snippet of the article.
+         */
+        function shareArticle(platform, url, title) {
+            let shareUrl = '';
+            switch (platform) {
+                case 'twitter':
+                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+                case 'facebook':
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+                case 'copy':
+                    navigator.clipboard.writeText(url).then(() => {
+                        alert('Ссылка скопирована в буфер обмена!');
+                    }).catch(err => {
+                        console.error('Не удалось скопировать текст: ', err);
+                        alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + url);
+                    });
+                    break;
+            }
+        }
+
+        /**
          * Creates a news card element.
          * @param {Object} article - The article data.
-         * @param {number} index - The index of the article (for layout).
+         * @param {number} index - The index of the article (for layout and animation delay).
          * @returns {HTMLElement} The created news card element.
          */
         function createNewsCard(article, index) {
@@ -200,6 +266,7 @@
                 cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
             }
             newsCard.className = cardClasses;
+            newsCard.style.setProperty('--animation-delay', `${index * 0.05}s`); // Staggered animation delay
 
             let imageHtml = '';
             let placeholderSize = '600x400'; // Default placeholder size
@@ -223,11 +290,34 @@
                     <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
                     <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
                 </div>
-                <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
-                   class="inline-block mt-4 font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                    Читать далее &rarr;
-                </a>
+                <div class="flex items-center justify-between mt-4">
+                    <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
+                       class="read-more-link inline-block font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                        Читать далее &rarr;
+                    </a>
+                    <div class="flex space-x-2">
+                        <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                            <i class="fab fa-twitter"></i>
+                        </button>
+                        <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                            <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
             `;
+
+            // Add event listeners for share buttons
+            newsCard.querySelectorAll('.share-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const platform = button.dataset.platform;
+                    const url = button.dataset.url;
+                    const title = button.dataset.title;
+                    shareArticle(platform, url, title);
+                });
+            });
 
             return newsCard;
         }
