@@ -117,6 +117,97 @@
                 text-align: center;
             }
         }
+
+        /* Modal styles */
+        .modal {
+            position: fixed;
+            z-index: 100; /* High z-index to be on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transform: translateY(-50px); /* Initial state for animation */
+            transition: transform 0.3s ease;
+            position: relative;
+            max-height: 80vh; /* Limit height for scrollable content */
+            display: flex;
+            flex-direction: column;
+        }
+        .modal.show .modal-content {
+            transform: translateY(0); /* Animate to original position */
+        }
+        .dark .modal-content {
+            background-color: #1f2937; /* Dark background for modal */
+            color: #f9fafb;
+        }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: #333;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .dark .close-button {
+            color: #ccc;
+        }
+        .dark .close-button:hover {
+            color: #eee;
+        }
+        .sources-list {
+            max-height: 50vh; /* Make list scrollable */
+            overflow-y: auto;
+            padding-right: 10px; /* For scrollbar */
+            margin-bottom: 1rem;
+        }
+        .sources-list label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+        .sources-list label:hover {
+            background-color: #f3f4f6; /* Light gray on hover */
+        }
+        .dark .sources-list label:hover {
+            background-color: #374151; /* Darker gray on hover */
+        }
+        .sources-list input[type="checkbox"] {
+            margin-right: 0.75rem;
+            transform: scale(1.2);
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
@@ -159,6 +250,14 @@
                    class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
         </div>
 
+        <!-- Source Selection Button -->
+        <div class="w-full max-w-xl mb-8 flex justify-center">
+            <button id="selectSourcesButton"
+                    class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Выбрать источники
+            </button>
+        </div>
+
         <!-- Category Buttons -->
         <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
             <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
@@ -191,6 +290,23 @@
         </div>
     </main>
 
+    <!-- Sources Modal -->
+    <div id="sourcesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton">&times;</span>
+            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Выберите источники новостей</h2>
+            <div id="sourcesList" class="sources-list flex-grow">
+                <!-- Sources checkboxes will be loaded here -->
+                <p class="text-gray-600 dark:text-gray-300">Загрузка источников...</p>
+            </div>
+            <div class="flex justify-end mt-4">
+                <button id="applySourcesButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         // Get references to DOM elements
         const newsContainer = document.getElementById('newsContainer');
@@ -206,10 +322,19 @@
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
 
+        // Source selection elements
+        const selectSourcesButton = document.getElementById('selectSourcesButton');
+        const sourcesModal = document.getElementById('sourcesModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const sourcesListContainer = document.getElementById('sourcesList');
+        const applySourcesButton = document.getElementById('applySourcesButton');
+
         let currentQuery = '';
         let currentCategory = '';
         let currentPage = 1;
         let totalResults = 0;
+        let allSources = []; // To store all fetched sources
+        let selectedSourceIds = []; // To store IDs of currently selected sources
 
         const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
 
@@ -393,6 +518,10 @@
                 if (toDateInput.value) {
                     urlParams.append('to_date', toDateInput.value);
                 }
+                // ДОБАВЛЕНО: Добавляем выбранные источники
+                if (selectedSourceIds.length > 0) {
+                    urlParams.append('sources', selectedSourceIds.join(','));
+                }
 
                 const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
                 console.log(`Fetching news from: ${url}`);
@@ -438,6 +567,83 @@
             }
         }
 
+        /**
+         * Fetches all available sources from the backend.
+         */
+        async function fetchSources() {
+            try {
+                const response = await fetch(`${BACKEND_API_URL}/sources`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
+                }
+                allSources = await response.json();
+                displaySourcesInModal();
+            } catch (error) {
+                console.error("Error fetching sources:", error);
+                sourcesListContainer.innerHTML = `<p class="text-red-500">Не удалось загрузить источники: ${error.message}</p>`;
+            }
+        }
+
+        /**
+         * Displays sources as checkboxes in the modal.
+         */
+        function displaySourcesInModal() {
+            sourcesListContainer.innerHTML = ''; // Clear previous content
+            if (allSources.length === 0) {
+                sourcesListContainer.innerHTML = `<p class="text-gray-600 dark:text-gray-300">Источники не найдены.</p>`;
+                return;
+            }
+
+            allSources.forEach(source => {
+                const isChecked = selectedSourceIds.includes(source.id);
+                const label = document.createElement('label');
+                label.className = 'flex items-center mb-2 cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700';
+                label.innerHTML = `
+                    <input type="checkbox" value="${source.id}" ${isChecked ? 'checked' : ''} class="mr-3 h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                    <span class="text-gray-900 dark:text-gray-100 font-medium">${source.name}</span>
+                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">- ${source.description || 'Нет описания.'}</span>
+                `;
+                sourcesListContainer.appendChild(label);
+            });
+        }
+
+        /**
+         * Shows the sources modal.
+         */
+        function showSourcesModal() {
+            sourcesModal.classList.add('show');
+            // Re-render sources in case selection changed
+            displaySourcesInModal(); 
+        }
+
+        /**
+         * Hides the sources modal.
+         */
+        function hideSourcesModal() {
+            sourcesModal.classList.remove('show');
+        }
+
+        /**
+         * Handles applying selected sources.
+         */
+        function applySelectedSources() {
+            selectedSourceIds = [];
+            const checkboxes = sourcesListContainer.querySelectorAll('input[type="checkbox"]:checked');
+            checkboxes.forEach(checkbox => {
+                selectedSourceIds.push(checkbox.value);
+            });
+            hideSourcesModal();
+            // Clear other filters when sources are applied
+            currentQuery = '';
+            searchInput.value = '';
+            currentCategory = '';
+            fromDateInput.value = '';
+            toDateInput.value = '';
+            updateActiveCategoryButton(currentCategory);
+            fetchAndDisplayNews(true); // Re-fetch news with new sources
+        }
+
         // Function to update active category button styling
         function updateActiveCategoryButton(selectedCategory) {
             const buttons = categoryButtonsContainer.querySelectorAll('.category-button');
@@ -467,6 +673,7 @@
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
+            selectedSourceIds = []; // Clear sources when searching by query
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -475,6 +682,7 @@
             if (event.key === 'Enter') {
                 currentQuery = searchInput.value.trim();
                 currentCategory = '';
+                selectedSourceIds = []; // Clear sources when searching by query
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -483,6 +691,7 @@
         fromDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
+            selectedSourceIds = []; // Clear sources when filtering by date
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -490,6 +699,7 @@
         toDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
+            selectedSourceIds = []; // Clear sources when filtering by date
             updateActiveCategoryButton(currentCategory);
             fetchAndDisplayNews(true);
         });
@@ -502,6 +712,7 @@
                 searchInput.value = '';
                 fromDateInput.value = '';
                 toDateInput.value = '';
+                selectedSourceIds = []; // Clear sources when category is selected
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -514,14 +725,27 @@
 
         themeToggle.addEventListener('click', toggleTheme);
 
+        // Source selection event listeners
+        selectSourcesButton.addEventListener('click', showSourcesModal);
+        closeModalButton.addEventListener('click', hideSourcesModal);
+        // Close modal when clicking outside content
+        sourcesModal.addEventListener('click', (event) => {
+            if (event.target === sourcesModal) {
+                hideSourcesModal();
+            }
+        });
+        applySourcesButton.addEventListener('click', applySelectedSources);
+
         // Initial load
         window.onload = () => {
             applySavedTheme();
+            fetchSources(); // Fetch sources when page loads
             fetchAndDisplayNews(true);
         };
     </script>
 </body>
 </html>
+
 
 
 
