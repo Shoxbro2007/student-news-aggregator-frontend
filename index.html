@@ -229,66 +229,69 @@
     </header>
 
     <main class="w-full max-w-4xl flex flex-col items-center">
-        <!-- Search Input and Button -->
-        <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
-                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-            <button id="searchButton"
-                    class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Найти новости
+        <!-- News Section (now the only main section) -->
+        <section id="newsSection" class="w-full flex flex-col items-center">
+            <!-- Search Input and Button -->
+            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
+                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                <button id="searchButton"
+                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Найти новости
+                </button>
+            </div>
+
+            <!-- Date Filter Inputs -->
+            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
+                <input type="date" id="fromDate"
+                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                
+                <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
+                <input type="date" id="toDate"
+                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+            </div>
+
+            <!-- Source Selection Button -->
+            <div class="w-full max-w-xl mb-8 flex justify-center">
+                <button id="selectSourcesButton"
+                        class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Выбрать источники
+                </button>
+            </div>
+
+            <!-- Category Buttons -->
+            <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports"><i class="fas fa-futbol mr-2"></i>Спорт</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
+                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment"><i class="fas fa-film mr-2"></i>Развлечения</button>
+            </div>
+
+            <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
+                <div class="loading-spinner mb-4"></div>
+                <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
+            </div>
+
+            <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
+                <!-- News articles will be injected here by JavaScript -->
+            </div>
+
+            <!-- Load More Button -->
+            <button id="loadMoreButton"
+                    class="hidden mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Загрузить больше
             </button>
-        </div>
 
-        <!-- Date Filter Inputs -->
-        <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
-            <input type="date" id="fromDate"
-                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-            
-            <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
-            <input type="date" id="toDate"
-                   class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-        </div>
-
-        <!-- Source Selection Button -->
-        <div class="w-full max-w-xl mb-8 flex justify-center">
-            <button id="selectSourcesButton"
-                    class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Выбрать источники
-            </button>
-        </div>
-
-        <!-- Category Buttons -->
-        <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports"><i class="fas fa-futbol mr-2"></i>Спорт</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
-            <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment"><i class="fas fa-film mr-2"></i>Развлечения</button>
-        </div>
-
-        <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
-            <div class="loading-spinner mb-4"></div>
-            <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
-        </div>
-
-        <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
-            <!-- News articles will be injected here by JavaScript -->
-        </div>
-
-        <!-- Load More Button -->
-        <button id="loadMoreButton"
-                class="hidden mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-            Загрузить больше
-        </button>
-
-        <!-- Updated Error Message Container -->
-        <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
-            <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
-            <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
-        </div>
+            <!-- Updated Error Message Container -->
+            <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
+                <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
+                <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
+            </div>
+        </section>
     </main>
 
     <!-- Sources Modal -->
@@ -313,7 +316,7 @@
         const newsContainer = document.getElementById('newsContainer');
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText'); // New: Specific error message element
+        const errorText = document.getElementById('errorText');
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
         const fromDateInput = document.getElementById('fromDate');
@@ -335,8 +338,8 @@
         let currentCategory = '';
         let currentPage = 1;
         let totalResults = 0;
-        let allSources = []; // To store all fetched sources
-        let selectedSourceIds = []; // To store IDs of currently selected sources
+        let allSources = [];
+        let selectedSourceIds = [];
 
         const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
 
@@ -423,13 +426,10 @@
             
             // Apply different layout based on index and current page
             if (currentPage === 1 && index === 0) {
-                // First card: large (full width)
                 cardClasses += ` w-full md:w-full lg:w-full large-card`;
             } else if (currentPage === 1 && (index === 1 || index === 2)) {
-                // Next two cards: medium (half width on larger screens)
                 cardClasses += ` w-full md:w-1/2 lg:w-1/2 medium-card`;
             } else {
-                // All other cards: standard (third width on larger screens)
                 cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
             }
             newsCard.className = cardClasses;
@@ -439,9 +439,9 @@
             let placeholderSize = '600x400'; // Default placeholder size
 
             if (currentPage === 1 && index === 0) {
-                placeholderSize = '800x450'; // Large placeholder for the first card
+                placeholderSize = '800x450';
             } else if (currentPage === 1 && (index === 1 || index === 2)) {
-                placeholderSize = '700x400'; // Medium placeholder for the next two cards
+                placeholderSize = '700x400';
             }
 
             if (article.image_url) {
@@ -456,6 +456,7 @@
                 <div>
                     <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
                     <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Автор: ${article.author || 'Неизвестно'}</p>
                 </div>
                 <div class="flex items-center justify-between mt-4">
                     <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
@@ -502,8 +503,8 @@
             }
 
             loadingIndicator.classList.remove('hidden');
-            errorMessage.classList.add('hidden'); // Hide general error message initially
-            errorText.textContent = ''; // Clear specific error text
+            errorMessage.classList.add('hidden');
+            errorText.textContent = '';
 
             try {
                 const urlParams = new URLSearchParams();
@@ -531,7 +532,7 @@
                 const response = await fetch(url);
 
                 if (!response.ok) {
-                    const errorJson = await response.json(); // Try to parse JSON error
+                    const errorJson = await response.json();
                     const apiError = errorJson.error || `HTTP error! Status: ${response.status}`;
                     throw new Error(apiError);
                 }
@@ -554,7 +555,6 @@
                     }
 
                 } else if (reset) {
-                    // Specific message for no results found with current filters
                     errorMessage.classList.remove('hidden');
                     errorText.textContent = `По вашему запросу или выбранным фильтрам новости не найдены. Попробуйте изменить критерии поиска или фильтрации.`;
                     loadMoreButton.classList.add('hidden');
@@ -564,7 +564,6 @@
             } catch (error) {
                 console.error("Error fetching news:", error);
                 errorMessage.classList.remove('hidden');
-                // Display a more specific error if available, otherwise a generic one
                 errorText.textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
                 loadMoreButton.classList.add('hidden');
             } finally {
@@ -717,7 +716,7 @@
                 searchInput.value = '';
                 fromDateInput.value = '';
                 toDateInput.value = '';
-                selectedSourceIds = []; // Clear sources when category is selected
+                selectedSourceIds = [];
                 updateActiveCategoryButton(currentCategory);
                 fetchAndDisplayNews(true);
             }
@@ -733,7 +732,6 @@
         // Source selection event listeners
         selectSourcesButton.addEventListener('click', showSourcesModal);
         closeModalButton.addEventListener('click', hideSourcesModal);
-        // Close modal when clicking outside content
         sourcesModal.addEventListener('click', (event) => {
             if (event.target === sourcesModal) {
                 hideSourcesModal();
@@ -745,11 +743,13 @@
         window.onload = () => {
             applySavedTheme();
             fetchSources(); // Fetch sources when page loads
-            fetchAndDisplayNews(true);
+            fetchAndDisplayNews(true); // Start on the news section
         };
     </script>
 </body>
 </html>
+
+
 
 
 
