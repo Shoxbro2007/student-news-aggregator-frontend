@@ -35,6 +35,10 @@
             border-top-right-radius: 0.75rem; /* Match card border radius */
             margin-bottom: 1rem; /* Space below image */
         }
+        /* Style for the large card image */
+        .news-card.large-card img {
+            height: 250px; /* Taller image for the large card */
+        }
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #2563eb; /* Blue spinner */
@@ -103,7 +107,8 @@
             <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
         </div>
 
-        <div id="newsContainer" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 w-full hidden">
+        <!-- News Container - now uses flexbox for more control over layout -->
+        <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
             <!-- News articles will be injected here by JavaScript -->
         </div>
 
@@ -218,23 +223,32 @@
                 totalResults = data.totalResults;
 
                 if (articles && articles.length > 0) {
-                    articles.forEach(article => {
+                    articles.forEach((article, index) => { // Added index to differentiate cards
                         const newsCard = document.createElement('div');
-                        // Apply Tailwind dark/light classes directly to the card and its content
-                        newsCard.className = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
+                        let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
+                        
+                        // Apply different layout for the first card on the first page
+                        if (currentPage === 1 && index === 0) {
+                            cardClasses += ` w-full md:w-full lg:w-full large-card`; // Occupy full width on all screen sizes
+                        } else {
+                            cardClasses += ` w-full md:w-1/2 lg:w-1/3`; // Standard 2 or 3 column layout
+                        }
+                        newsCard.className = cardClasses;
 
                         let imageHtml = '';
+                        // Use a larger placeholder for the large card if no image
+                        const placeholderSize = (currentPage === 1 && index === 0) ? '800x450' : '600x400';
+
                         if (article.image_url) {
                             imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" 
-                                         onerror="this.onerror=null;this.src='https://placehold.co/600x400/cccccc/333333?text=No+Image';" />`;
+                                         onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
                         } else {
-                            imageHtml = `<img src="https://placehold.co/600x400/cccccc/333333?text=No+Image" alt="No image available" />`;
+                            imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" />`;
                         }
 
                         newsCard.innerHTML = `
                             ${imageHtml}
                             <div>
-                                <!-- Apply Tailwind dark: classes directly here -->
                                 <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
                                 <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
                             </div>
@@ -345,6 +359,7 @@
     </script>
 </body>
 </html>
+
 
 
 
