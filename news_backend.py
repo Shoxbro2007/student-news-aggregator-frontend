@@ -1,58 +1,72 @@
 # news_backend.py
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import requests # Import the requests library for making HTTP requests
-import os # To potentially get API key from environment variables (good practice)
+import requests
+import os
 
 app = Flask(__name__)
-# Enable CORS for all routes, allowing frontend to access this backend
 CORS(app)
 
-# --- ВАШ API-КЛЮЧ NEWS API ---
-# Замените 'YOUR_NEWS_API_KEY' на ваш реальный API-ключ, полученный с newsapi.org
-# Хорошей практикой является хранение ключей в переменных окружения, но для начала
-# можно вставить его прямо сюда.
+# Ваш API-ключ News API
 NEWS_API_KEY = 'cb80d44628a242c6a30668812f7d2ffc'
-# Или, если вы хотите использовать переменную окружения:
-# NEWS_API_KEY = os.getenv('NEWS_API_KEY', 'YOUR_NEWS_API_KEY_IF_NOT_SET_IN_ENV')
 
-# Базовый URL для News API (для поиска по всем статьям)
 NEWS_API_BASE_URL = 'https://newsapi.org/v2/everything'
+NEWS_API_TOP_HEADLINES_URL = 'https://newsapi.org/v2/top-headlines'
 
 @app.route('/api/news', methods=['GET'])
 def get_news():
-    # Получаем поисковый запрос из аргументов запроса
     query = request.args.get('query', '')
-    print(f"Backend received query: '{query}'") # Для отладки
+    category = request.args.get('category', '').lower()
+    # Добавляем новый параметр 'page'
+    page = request.args.get('page', 1) # По умолчанию страница 1
+    
+    print(f"Backend received query: '{query}', category: '{category}', page: {page}")
 
-    if not NEWS_API_KEY or NEWS_API_KEY == 'YOUR_NEWS_API_KEY':
-        return jsonify({"error": "News API key is not configured. Please get a key from newsapi.org and update news_backend.py"}), 500
+    if not NEWS_API_KEY:
+        return jsonify({"error": "News API key is not configured in the code."}), 500
 
-    params = {
-        'q': query if query else 'students OR education OR university', # Если запрос пуст, ищем общие новости для студентов
-        'language': 'ru', # Ищем новости на русском языке
-        'sortBy': 'publishedAt', # Сортируем по дате публикации (самые свежие)
-        'pageSize': 20, # Количество статей на страницу
-        'apiKey': NEWS_API_KEY
-    }
+    articles = []
+    
+    # Определяем, какой эндпоинт News API использовать
+    if category and not query:
+        url = NEWS_API_TOP_HEADLINES_URL
+        params = {
+            'category': category,
+            'language': 'ru',
+            'pageSize': 20,
+            'page': page, # Передаем номер страницы
+            'apiKey': NEWS_API_KEY
+        }
+        supported_categories = ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology']
+        if category not in supported_categories:
+            return jsonify({"error": f"Category '{category}' is not supported by News API or is not a valid category for top-headlines. Supported categories: {', '.join(supported_categories)}"}), 400
+
+    else:
+        url = NEWS_API_BASE_URL
+        params = {
+            'q': query if query else 'students OR education OR university',
+            'language': 'ru',
+            'sortBy': 'publishedAt',
+            'pageSize': 20,
+            'page': page, # Передаем номер страницы
+            'apiKey': NEWS_API_KEY
+        }
 
     try:
-        # Выполняем HTTP GET запрос к News API
-        response = requests.get(NEWS_API_BASE_URL, params=params)
-        response.raise_for_status() # Вызывает исключение для ошибок HTTP (4xx или 5xx)
+        response = requests.get(url, params=params)
+        response.raise_for_status()
         data = response.json()
 
-        articles = []
         if data.get('status') == 'ok' and data.get('articles'):
             for article in data['articles']:
-                # Форматируем статьи в нужный нам вид
                 articles.append({
                     "source_title": article.get('source', {}).get('name', 'Неизвестный источник'),
                     "snippet": article.get('description', 'Нет описания.'),
                     "url": article.get('url', '#')
                 })
         
-        return jsonify(articles)
+        # News API также возвращает общее количество результатов, что полезно для пагинации
+        return jsonify({"articles": articles, "totalResults": data.get('totalResults', 0)})
     except requests.exceptions.RequestException as e:
         print(f"Error fetching from News API: {e}")
         return jsonify({"error": f"Failed to fetch news from external API: {e}"}), 500
@@ -61,6 +75,5 @@ def get_news():
         return jsonify({"error": f"An unexpected error occurred: {e}"}), 500
 
 if __name__ == '__main__':
-    # Запускаем Flask-приложение
-    # В производственной среде используйте более надежный WSGI-сервер, такой как Gunicorn
     app.run(debug=True, port=5000)
+

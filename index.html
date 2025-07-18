@@ -77,6 +77,12 @@
             <!-- News articles will be injected here by JavaScript -->
         </div>
 
+        <!-- Load More Button -->
+        <button id="loadMoreButton"
+                class="hidden mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+            Загрузить больше
+        </button>
+
         <div id="errorMessage" class="hidden text-red-600 text-center mt-8 p-4 bg-red-100 border border-red-400 rounded-lg">
             <p class="font-semibold">Произошла ошибка при загрузке новостей.</p>
             <p>Пожалуйста, попробуйте обновить страницу или проверьте ваше интернет-соединение.</p>
@@ -91,33 +97,44 @@
         const searchInput = document.getElementById('searchInput');
         const searchButton = document.getElementById('searchButton');
         const categoryButtonsContainer = document.getElementById('categoryButtons');
-        let currentCategory = ''; // To keep track of the active category
+        const loadMoreButton = document.getElementById('loadMoreButton');
+
+        let currentQuery = '';    // Текущий поисковый запрос
+        let currentCategory = ''; // Текущая выбранная категория
+        let currentPage = 1;      // Текущая страница пагинации
+        let totalResults = 0;     // Общее количество доступных результатов
 
         // Define the backend API URL
-        const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api/news'; // Убедитесь, что это ваш актуальный URL бэкенда
+        const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api/news';
 
         /**
          * Fetches news articles from the backend API and displays them.
-         * @param {string} query - The search query entered by the user.
-         * @param {string} category - The selected category.
+         * @param {boolean} reset - If true, clears existing news and resets page to 1.
          */
-        async function fetchAndDisplayNews(query = '', category = '') {
-            loadingIndicator.classList.remove('hidden'); // Show loading spinner
-            newsContainer.classList.add('hidden');      // Hide news container
-            errorMessage.classList.add('hidden');       // Hide error message
+        async function fetchAndDisplayNews(reset = true) {
+            if (reset) {
+                currentPage = 1; // Сбрасываем страницу на 1 при новом поиске или смене категории
+                newsContainer.innerHTML = ''; // Очищаем контейнер новостей
+                newsContainer.classList.add('hidden'); // Скрываем контейнер
+                loadMoreButton.classList.add('hidden'); // Скрываем кнопку "Загрузить больше"
+            }
+
+            loadingIndicator.classList.remove('hidden'); // Показываем индикатор загрузки
+            errorMessage.classList.add('hidden');       // Скрываем сообщение об ошибке
 
             try {
-                // Construct the URL with query and category parameters
+                // Construct the URL with query, category, and page parameters
                 const urlParams = new URLSearchParams();
-                if (query) {
-                    urlParams.append('query', query);
+                if (currentQuery) {
+                    urlParams.append('query', currentQuery);
                 }
-                if (category) {
-                    urlParams.append('category', category);
+                if (currentCategory) {
+                    urlParams.append('category', currentCategory);
                 }
+                urlParams.append('page', currentPage); // Добавляем параметр страницы
                 
                 const url = `${BACKEND_API_URL}?${urlParams.toString()}`;
-                console.log(`Fetching news from: ${url}`); // For debugging
+                console.log(`Fetching news from: ${url}`); // Для отладки
 
                 const response = await fetch(url);
 
@@ -127,10 +144,11 @@
                     throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
                 }
 
-                const articles = await response.json();
+                const data = await response.json(); // Получаем весь объект с articles и totalResults
+                const articles = data.articles;
+                totalResults = data.totalResults;
 
                 if (articles && articles.length > 0) {
-                    newsContainer.innerHTML = ''; // Clear previous news
                     articles.forEach(article => {
                         // Create a news card element
                         const newsCard = document.createElement('div');
@@ -147,19 +165,34 @@
                                 Читать далее &rarr;
                             </a>
                         `;
-                        newsContainer.appendChild(newsCard); // Add card to container
+                        newsContainer.appendChild(newsCard); // Добавляем карточку в контейнер
                     });
-                    newsContainer.classList.remove('hidden'); // Show news container
-                } else {
-                    errorMessage.classList.remove('hidden'); // Show error if no results
-                    errorMessage.querySelector('p').textContent = `По запросу "${query}" или в категории "${category}" новости не найдены.`;
+                    newsContainer.classList.remove('hidden'); // Показываем контейнер новостей
+
+                    // Показываем кнопку "Загрузить больше", если есть еще результаты
+                    // News API обычно возвращает максимум 1000 статей для бесплатных аккаунтов,
+                    // и pageSize по умолчанию 20.
+                    // Если текущее количество статей меньше общего количества результатов, показываем кнопку.
+                    if (newsContainer.children.length < totalResults) {
+                        loadMoreButton.classList.remove('hidden');
+                    } else {
+                        loadMoreButton.classList.add('hidden');
+                    }
+
+                } else if (reset) { // Если это первый запрос и нет результатов
+                    errorMessage.classList.remove('hidden'); // Показываем ошибку
+                    errorMessage.querySelector('p').textContent = `По запросу "${currentQuery}" или в категории "${currentCategory}" новости не найдены.`;
+                    loadMoreButton.classList.add('hidden'); // Скрываем кнопку, если нет результатов
+                } else { // Если это запрос "Загрузить больше", но больше статей нет
+                    loadMoreButton.classList.add('hidden'); // Скрываем кнопку
                 }
             } catch (error) {
                 console.error("Error fetching news:", error);
-                errorMessage.classList.remove('hidden'); // Show error message on failure
+                errorMessage.classList.remove('hidden'); // Показываем сообщение об ошибке
                 errorMessage.querySelector('p').textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
+                loadMoreButton.classList.add('hidden'); // Скрываем кнопку при ошибке
             } finally {
-                loadingIndicator.classList.add('hidden'); // Hide loading spinner
+                loadingIndicator.classList.add('hidden'); // Скрываем индикатор загрузки
             }
         }
 
@@ -177,19 +210,19 @@
 
         // Event listener for the search button
         searchButton.addEventListener('click', () => {
-            const query = searchInput.value.trim();
-            currentCategory = ''; // Clear category when searching
-            updateActiveCategoryButton(currentCategory); // Update button styling
-            fetchAndDisplayNews(query, currentCategory);
+            currentQuery = searchInput.value.trim();
+            currentCategory = ''; // Очищаем категорию при поиске
+            updateActiveCategoryButton(currentCategory); // Обновляем стиль кнопок
+            fetchAndDisplayNews(true); // Загружаем новости, сбрасывая текущие
         });
 
         // Allow searching by pressing Enter in the input field
         searchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                const query = searchInput.value.trim();
-                currentCategory = ''; // Clear category when searching
-                updateActiveCategoryButton(currentCategory); // Update button styling
-                fetchAndDisplayNews(query, currentCategory);
+                currentQuery = searchInput.value.trim();
+                currentCategory = ''; // Очищаем категорию при поиске
+                updateActiveCategoryButton(currentCategory); // Обновляем стиль кнопок
+                fetchAndDisplayNews(true); // Загружаем новости, сбрасывая текущие
             }
         });
 
@@ -197,18 +230,24 @@
         categoryButtonsContainer.addEventListener('click', (event) => {
             if (event.target.classList.contains('category-button')) {
                 currentCategory = event.target.dataset.category;
-                searchInput.value = ''; // Clear search input when category is selected
-                updateActiveCategoryButton(currentCategory); // Update button styling
-                fetchAndDisplayNews('', currentCategory); // Fetch news for the selected category
+                currentQuery = ''; // Очищаем поисковый запрос при выборе категории
+                searchInput.value = ''; // Очищаем поле поиска
+                updateActiveCategoryButton(currentCategory); // Обновляем стиль кнопок
+                fetchAndDisplayNews(true); // Загружаем новости для выбранной категории, сбрасывая текущие
             }
+        });
+
+        // Event listener for Load More button
+        loadMoreButton.addEventListener('click', () => {
+            currentPage++; // Увеличиваем номер страницы
+            fetchAndDisplayNews(false); // Загружаем больше новостей, не сбрасывая текущие
         });
 
         // Fetch initial news when the page loads (default to no query and no category)
         window.onload = () => {
-            updateActiveCategoryButton(''); // Set "Все" as active initially
-            fetchAndDisplayNews('', '');
+            updateActiveCategoryButton(''); // Устанавливаем "Все" как активную по умолчанию
+            fetchAndDisplayNews(true); // Загружаем начальные новости
         };
     </script>
 </body>
 </html>
-
