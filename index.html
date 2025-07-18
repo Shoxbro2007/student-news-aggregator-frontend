@@ -3,7 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новости для студентов</title>
+    <title>Новости для студентов | Актуальные события, образование, карьера</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
+    <meta name="author" content="Student News Aggregator">
+
+    <!-- Open Graph / Social Media Meta Tags (for better sharing previews) -->
+    <meta property="og:title" content="Новости для студентов | Актуальные события, образование, карьера">
+    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://shoxbro2007.github.io/student-news-aggregator-frontend/">
+    <meta property="og:image" content="https://shoxbro2007.github.io/student-news-aggregator-frontend/NSA.jpg"> <!-- Убедитесь, что путь к логотипу верен -->
+    <meta property="og:site_name" content="Student News Aggregator">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -209,6 +223,8 @@
             transform: scale(1.2);
         }
     </style>
+    <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
+    <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
@@ -284,6 +300,19 @@
                 </button>
             </div>
 
+            <!-- Яндекс.Директ/РСЯ: Разместите код вашего рекламного блока здесь -->
+            <!-- Пример для адаптивного блока: -->
+            <!-- <div id="yandex_rtb_R-A-123456-1" class="w-full max-w-4xl my-8 text-center"></div>
+            <script>
+                window.yaContextCb = window.yaContextCb || [];
+                window.yaContextCb.push(() => {
+                    Ya.Context.AdvManager.render({
+                        blockId: 'R-A-123456-1',
+                        renderTo: 'yandex_rtb_R-A-123456-1'
+                    })
+                })
+            </script> -->
+
             <!-- Category Buttons -->
             <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
                 <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
@@ -314,6 +343,19 @@
             <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
                 <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
                 <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="w-full max-w-xl mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg text-center">
+                <h3 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Обратная связь</h3>
+                <p class="text-gray-700 dark:text-gray-300 mb-4">Мы ценим ваше мнение! Если у вас есть предложения, вопросы или вы заметили ошибку, пожалуйста, напишите нам:</p>
+                <a href="mailto:Shoxbro2007@gmail.com?subject=Обратная связь по Student News Aggregator" 
+                   class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Написать нам
+                </a>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    (Ваш адрес электронной почты: Shoxbro2007@gmail.com)
+                </p>
             </div>
         </section>
     </main>
@@ -347,7 +389,7 @@
         const authorSearchButton = document.getElementById('authorSearchButton');
         const fromDateInput = document.getElementById('fromDate');
         const toDateInput = document.getElementById('toDate');
-        const languageSelect = document.getElementById('languageSelect'); // New: Language select element
+        const languageSelect = document.getElementById('languageSelect');
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const loadMoreButton = document.getElementById('loadMoreButton');
         const themeToggle = document.getElementById('themeToggle');
@@ -364,7 +406,7 @@
         let currentQuery = '';
         let currentCategory = '';
         let currentAuthor = '';
-        let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru'; // New: Load language from localStorage, default to 'ru'
+        let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru';
         let currentPage = 1;
         let totalResults = 0;
         let allSources = [];
@@ -546,7 +588,7 @@
                 if (currentAuthor) {
                     urlParams.append('author', currentAuthor);
                 }
-                urlParams.append('language', currentLanguage); // New: Add language parameter
+                urlParams.append('language', currentLanguage);
                 urlParams.append('page', currentPage);
                 
                 if (fromDateInput.value) {
@@ -778,7 +820,7 @@
             fetchAndDisplayNews(true);
         });
 
-        // New: Language select event listener
+        // Language select event listener
         languageSelect.addEventListener('change', () => {
             currentLanguage = languageSelect.value;
             localStorage.setItem('selectedLanguage', currentLanguage); // Save selected language
