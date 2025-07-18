@@ -28,7 +28,7 @@
         }
         .news-card img {
             width: 100%;
-            height: 180px;
+            height: 180px; /* Default height for standard cards */
             object-fit: cover;
             border-top-left-radius: 0.75rem;
             border-top-right-radius: 0.75rem;
@@ -40,7 +40,7 @@
         }
         /* Style for medium cards image */
         .news-card.medium-card img {
-            height: 200px; /* Slightly taller than small, shorter than large */
+            height: 200px; /* Slightly taller than standard, shorter than large */
         }
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
@@ -273,7 +273,7 @@
 
                 if (articles && articles.length > 0) {
                     articles.forEach((article, index) => {
-                        const newsCard = createNewsCard(article, index); // No isFavorite flag needed
+                        const newsCard = createNewsCard(article, index);
                         newsContainer.appendChild(newsCard);
                     });
                     newsContainer.classList.remove('hidden');
@@ -369,4 +369,3 @@
     </script>
 </body>
 </html>
-
