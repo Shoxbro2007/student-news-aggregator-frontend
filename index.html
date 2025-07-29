@@ -14,8 +14,8 @@
     <meta property="og:title" content="Новости для студентов | Актуальные события, образование, карьера">
     <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://shoxbro2007.github.io/student-news-aggregator-frontend/">
-    <meta property="og:image" content="https://shoxbro2007.github.io/student-news-aggregator-frontend/NSA.jpg"> <!-- Убедитесь, что путь к логотипу верен -->
+    <meta property="og:url" content="https://studnews.ru/"> <!-- Обновлено на ваш новый домен -->
+    <meta property="og:image" content="https://studnews.ru/NSA.jpg"> <!-- Обновлено на ваш новый домен -->
     <meta property="og:site_name" content="Student News Aggregator">
 
     <!-- Tailwind CSS CDN -->
@@ -240,23 +240,6 @@
     <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
     <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
 
-    <!-- Яндекс.Метрика: Разместите код счетчика здесь -->
-    <!-- Пример: -->
-    <!-- <script type="text/javascript" >
-       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-       m[i].l=1*new Date();
-       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
-       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
-
-       ym(YOUR_COUNTER_ID, "init", {
-            clickmap:true,
-            trackLinks:true,
-            accurateTrackBounce:true,
-            webvisor:true
-       });
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/YOUR_COUNTER_ID" style="position:absolute; left:-9999px;" alt="" /></div></noscript> -->
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
@@ -502,6 +485,7 @@
         let viewedArticlesHistory = JSON.parse(localStorage.getItem('viewedArticlesHistory')) || [];
 
         const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
+        const BASE_SITE_URL = 'https://studnews.ru/'; // Ваш новый домен
 
         // --- Theme Toggling ---
         /**
@@ -545,32 +529,36 @@
         /**
          * Handles sharing an article.
          * @param {string} platform - 'twitter', 'facebook', 'copy', 'whatsapp', 'viber'.
-         * @param {string} url - The URL of the article.
+         * @param {string} url - The URL of the article (original source).
          * @param {string} title - The title/snippet of the article.
+         * @param {string} sourceId - The ID of the news source.
          */
-        function shareArticle(platform, url, title) {
+        function shareArticle(platform, url, title, sourceId) {
+            // Construct the URL to your site with parameters for search
+            const sharedSiteUrl = `${BASE_SITE_URL}?q=${encodeURIComponent(title || '')}&s=${encodeURIComponent(sourceId || '')}`;
+            const text = encodeURIComponent(`Читайте: "${title}" на Student News Aggregator: ${sharedSiteUrl}`);
+
             let shareUrl = '';
-            const text = encodeURIComponent(`Читайте: "${title}" на Student News Aggregator: ${url}`);
             switch (platform) {
                 case 'twitter':
-                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
+                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(sharedSiteUrl)}&text=${encodeURIComponent(title)}`;
                     window.open(shareUrl, '_blank');
                     break;
                 case 'facebook':
-                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharedSiteUrl)}`;
                     window.open(shareUrl, '_blank');
                     break;
                 case 'copy':
                     const tempInput = document.createElement('textarea');
-                    tempInput.value = url;
+                    tempInput.value = sharedSiteUrl; // Copy your site's URL with params
                     document.body.appendChild(tempInput);
                     tempInput.select();
                     try {
                         document.execCommand('copy');
-                        alert('Ссылка скопирована в буфер обмена!');
+                        alert('Ссылка на статью на вашем сайте скопирована в буфер обмена!');
                     } catch (err) {
                         console.error('Не удалось скопировать текст: ', err);
-                        alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + url);
+                        alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + sharedSiteUrl);
                     } finally {
                         document.body.removeChild(tempInput);
                     }
@@ -685,19 +673,19 @@
                                 <i class="${bookmarkIconClass}"></i>
                             </button>
                         ` : ''}
-                        <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                        <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-twitter"></i>
                         </button>
-                        <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                        <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-facebook-f"></i>
                         </button>
-                        <button class="share-button whatsapp text-green-500 hover:bg-green-500 hover:text-white" data-platform="whatsapp" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                        <button class="share-button whatsapp text-green-500 hover:bg-green-500 hover:text-white" data-platform="whatsapp" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-whatsapp"></i>
                         </button>
-                        <button class="share-button viber text-purple-500 hover:bg-purple-500 hover:text-white" data-platform="viber" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                        <button class="share-button viber text-purple-500 hover:bg-purple-500 hover:text-white" data-platform="viber" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-viber"></i>
                         </button>
-                        <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}">
+                        <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
@@ -708,30 +696,12 @@
             newsCard.querySelectorAll('.share-button').forEach(button => {
                 button.addEventListener('click', () => {
                     const platform = button.dataset.platform;
-                    const url = button.dataset.url;
+                    const url = button.dataset.url; // Original article URL
                     const title = button.dataset.title;
-                    shareArticle(platform, url, title);
+                    const sourceId = button.dataset.sourceId; // Source ID
+                    shareArticle(platform, url, title, sourceId);
                 });
             });
-
-            // Add event listener for bookmark button
-            if (!isBookmarkOrHistory) {
-                const bookmarkButton = newsCard.querySelector('.bookmark-button');
-                if (bookmarkButton) {
-                    bookmarkButton.addEventListener('click', () => {
-                        toggleBookmark(article);
-                        // Update icon immediately
-                        const icon = bookmarkButton.querySelector('i');
-                        if (bookmarkedArticles.some(a => a.url === article.url)) {
-                            icon.classList.remove('far', 'text-gray-500');
-                            icon.classList.add('fas', 'text-blue-500');
-                        } else {
-                            icon.classList.remove('fas', 'text-blue-500');
-                            icon.classList.add('far', 'text-gray-500');
-                        }
-                    });
-                }
-            }
 
             // Add event listener for "Read More" link to track history
             const readMoreLink = newsCard.querySelector('.read-more-link');
@@ -919,7 +889,7 @@
             fromDateInput.value = '';
             toDateInput.value = '';
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true); // Re-fetch news with new sources
+            renderPage('main'); // Re-fetch news with new sources
         }
 
         // --- UI Updates ---
@@ -1178,6 +1148,27 @@
                 selectedSourceIds = savedFilters.selectedSourceIds || [];
                 languageSelect.value = savedFilters.language || 'ru';
                 currentLanguage = savedFilters.language || 'ru';
+            }
+
+            // Check for URL parameters for direct article linking
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryParam = urlParams.get('q');
+            const sourceParam = urlParams.get('s');
+
+            if (queryParam || sourceParam) {
+                // If parameters are present, use them for initial search
+                currentQuery = queryParam || '';
+                searchInput.value = queryParam || '';
+                selectedSourceIds = sourceParam ? [sourceParam] : [];
+                // Clear other filters to focus on the shared article's context
+                currentCategory = '';
+                currentAuthor = '';
+                authorSearchInput.value = '';
+                fromDateInput.value = '';
+                toDateInput.value = '';
+                
+                // Remove parameters from URL to keep it clean after initial load
+                // history.replaceState({}, document.title, window.location.pathname);
             }
 
             updateActiveCategoryButton(currentCategory);
