@@ -98,6 +98,9 @@
         .share-button.twitter:hover { background-color: #1DA1F2; color: white; }
         .share-button.facebook:hover { background-color: #1877F2; color: white; }
         .share-button.copy:hover { background-color: #6B7280; color: white; } /* Gray-500 */
+        .share-button.whatsapp:hover { background-color: #25D366; color: white; } /* WhatsApp green */
+        .share-button.viber:hover { background-color: #7360F2; color: white; } /* Viber purple */
+
 
         /* General UI Polish */
         .main-title {
@@ -222,10 +225,38 @@
             margin-right: 0.75rem;
             transform: scale(1.2);
         }
-   </style>
+
+        /* Style for active navigation button */
+        .nav-button.active {
+            background-color: #2563eb; /* Blue-600 */
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .dark .nav-button.active {
+            background-color: #4b5563; /* Gray-700 */
+            color: #e5e7eb; /* Gray-200 */
+        }
+    </style>
     <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
     <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
 
+    <!-- Яндекс.Метрика: Разместите код счетчика здесь -->
+    <!-- Пример: -->
+    <!-- <script type="text/javascript" >
+       (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+       m[i].l=1*new Date();
+       for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+       k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+       (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+       ym(YOUR_COUNTER_ID, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+       });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/YOUR_COUNTER_ID" style="position:absolute; left:-9999px;" alt="" /></div></noscript> -->
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
@@ -239,6 +270,7 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
+</head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
     <header class="w-full max-w-4xl text-center mb-8 relative">
@@ -258,8 +290,21 @@
     </header>
 
     <main class="w-full max-w-4xl flex flex-col items-center">
-        <!-- News Section (now the only main section) -->
-        <section id="newsSection" class="w-full flex flex-col items-center">
+        <!-- Navigation Buttons for different views -->
+        <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-4">
+            <button id="mainNewsNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out active" data-view="main">
+                <i class="fas fa-newspaper mr-2"></i> Главные новости
+            </button>
+            <button id="bookmarksNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="bookmarks">
+                <i class="fas fa-bookmark mr-2"></i> Мои закладки
+            </button>
+            <button id="historyNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="history">
+                <i class="fas fa-history mr-2"></i> История просмотров
+            </button>
+        </div>
+
+        <!-- Main News Section -->
+        <section id="mainPageView" class="w-full flex flex-col items-center">
             <!-- Search Input and Button -->
             <div class="w-full max-w-xl mb-4 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
@@ -280,7 +325,7 @@
                 </button>
             </div>
 
-            <!-- Date Filter Inputs -->
+            <!-- Date Filter Inputs and Quick Buttons -->
             <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
                 <input type="date" id="fromDate"
@@ -290,6 +335,12 @@
                 <input type="date" id="toDate"
                        class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
             </div>
+            <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-2">
+                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="1">За 24 часа</button>
+                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="7">За 7 дней</button>
+                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="30">За 30 дней</button>
+            </div>
+
 
             <!-- Language and Source Selection Buttons -->
             <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
@@ -312,19 +363,6 @@
                     Выбрать источники
                 </button>
             </div>
-
-            <!-- Яндекс.Директ/РСЯ: Разместите код вашего рекламного блока здесь -->
-            <!-- Пример для адаптивного блока: -->
-            <!-- <div id="yandex_rtb_R-A-123456-1" class="w-full max-w-4xl my-8 text-center"></div>
-            <script>
-                window.yaContextCb = window.yaContextCb || [];
-                window.yaContextCb.push(() => {
-                    Ya.Context.AdvManager.render({
-                        blockId: 'R-A-123456-1',
-                        renderTo: 'yandex_rtb_R-A-123456-1'
-                    })
-                })
-            </script> -->
 
             <!-- Category Buttons -->
             <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
@@ -371,6 +409,25 @@
                 </p>
             </div>
         </section>
+
+        <!-- Bookmarks Section -->
+        <section id="bookmarksPageView" class="w-full flex-col items-center hidden">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">Мои закладки</h2>
+            <div id="bookmarksContainer" class="flex flex-wrap gap-6 w-full">
+                <!-- Bookmarked articles will be injected here -->
+                <p id="noBookmarksMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">У вас пока нет сохраненных закладок.</p>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historyPageView" class="w-full flex-col items-center hidden">
+            <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">История просмотров</h2>
+            <div id="historyContainer" class="flex flex-wrap gap-6 w-full">
+                <!-- Viewed articles will be injected here -->
+                <p id="noHistoryMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">Ваша история просмотров пуста.</p>
+            </div>
+        </section>
+
     </main>
 
     <!-- Sources Modal -->
@@ -392,7 +449,15 @@
 
     <script type="module">
         // Get references to DOM elements
+        const mainPageView = document.getElementById('mainPageView');
+        const bookmarksPageView = document.getElementById('bookmarksPageView');
+        const historyPageView = document.getElementById('historyPageView');
         const newsContainer = document.getElementById('newsContainer');
+        const bookmarksContainer = document.getElementById('bookmarksContainer');
+        const historyContainer = document.getElementById('historyContainer');
+        const noBookmarksMessage = document.getElementById('noBookmarksMessage');
+        const noHistoryMessage = document.getElementById('noHistoryMessage');
+
         const loadingIndicator = document.getElementById('loadingIndicator');
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
@@ -402,12 +467,19 @@
         const authorSearchButton = document.getElementById('authorSearchButton');
         const fromDateInput = document.getElementById('fromDate');
         const toDateInput = document.getElementById('toDate');
+        const dateQuickButtons = document.querySelectorAll('.date-quick-button');
         const languageSelect = document.getElementById('languageSelect');
         const categoryButtonsContainer = document.getElementById('categoryButtons');
         const loadMoreButton = document.getElementById('loadMoreButton');
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlElement = document.documentElement;
+
+        // Navigation elements
+        const mainNewsNavButton = document.getElementById('mainNewsNavButton');
+        const bookmarksNavButton = document.getElementById('bookmarksNavButton');
+        const historyNavButton = document.getElementById('historyNavButton');
+        const navButtons = document.querySelectorAll('.nav-button');
 
         // Source selection elements
         const selectSourcesButton = document.getElementById('selectSourcesButton');
@@ -423,10 +495,15 @@
         let currentPage = 1;
         let totalResults = 0;
         let allSources = [];
-        let selectedSourceIds = [];
+        let selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+
+        // State for bookmarked and history articles
+        let bookmarkedArticles = JSON.parse(localStorage.getItem('bookmarkedArticles')) || [];
+        let viewedArticlesHistory = JSON.parse(localStorage.getItem('viewedArticlesHistory')) || [];
 
         const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
 
+        // --- Theme Toggling ---
         /**
          * Toggles between light and dark themes.
          */
@@ -445,6 +522,7 @@
                 themeIcon.classList.add('fa-moon');
             }
             updateActiveCategoryButton(currentCategory);
+            updateActiveNavButton(currentPageView); // Update nav button colors on theme change
         }
 
         /**
@@ -463,14 +541,16 @@
             }
         }
 
+        // --- Sharing Functionality ---
         /**
          * Handles sharing an article.
-         * @param {string} platform - 'twitter', 'facebook', or 'copy'.
+         * @param {string} platform - 'twitter', 'facebook', 'copy', 'whatsapp', 'viber'.
          * @param {string} url - The URL of the article.
          * @param {string} title - The title/snippet of the article.
          */
         function shareArticle(platform, url, title) {
             let shareUrl = '';
+            const text = encodeURIComponent(`Читайте: "${title}" на Student News Aggregator: ${url}`);
             switch (platform) {
                 case 'twitter':
                     shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`;
@@ -495,23 +575,72 @@
                         document.body.removeChild(tempInput);
                     }
                     break;
+                case 'whatsapp':
+                    shareUrl = `https://api.whatsapp.com/send?text=${text}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+                case 'viber':
+                    shareUrl = `viber://forward?text=${text}`;
+                    window.open(shareUrl, '_blank');
+                    break;
+            }
+        }
+
+        // --- Bookmark and History Management ---
+        /**
+         * Toggles an article's bookmark status.
+         * @param {Object} article - The article to bookmark/unbookmark.
+         */
+        function toggleBookmark(article) {
+            const index = bookmarkedArticles.findIndex(a => a.url === article.url);
+            if (index > -1) {
+                bookmarkedArticles.splice(index, 1); // Remove
+                alert('Статья удалена из закладок!');
+            } else {
+                bookmarkedArticles.unshift(article); // Add to beginning
+                alert('Статья добавлена в закладки!');
+            }
+            localStorage.setItem('bookmarkedArticles', JSON.stringify(bookmarkedArticles));
+            // If on bookmarks page, re-render
+            if (currentPageView === 'bookmarks') {
+                renderBookmarksPage();
             }
         }
 
         /**
+         * Adds an article to the history.
+         * @param {Object} article - The article to add to history.
+         */
+        function addArticleToHistory(article) {
+            // Remove if already exists to move to top
+            const index = viewedArticlesHistory.findIndex(a => a.url === article.url);
+            if (index > -1) {
+                viewedArticlesHistory.splice(index, 1);
+            }
+            viewedArticlesHistory.unshift(article); // Add to beginning
+            // Keep history limited, e.g., to 50 articles
+            if (viewedArticlesHistory.length > 50) {
+                viewedArticlesHistory = viewedArticlesHistory.slice(0, 50);
+            }
+            localStorage.setItem('viewedArticlesHistory', JSON.stringify(viewedArticlesHistory));
+        }
+
+        // --- News Card Creation ---
+        /**
          * Creates a news card element.
          * @param {Object} article - The article data.
          * @param {number} index - The index of the article (for layout and animation delay).
+         * @param {boolean} isBookmarkOrHistory - True if rendering for bookmarks/history page (no bookmark button, different styling for 'read more').
          * @returns {HTMLElement} The created news card element.
          */
-        function createNewsCard(article, index) {
+        function createNewsCard(article, index, isBookmarkOrHistory = false) {
             const newsCard = document.createElement('div');
             let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
             
-            // Apply different layout based on index and current page
-            if (currentPage === 1 && index === 0) {
+            // Apply different layout based on index and current page for main view
+            if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
                 cardClasses += ` w-full md:w-full lg:w-full large-card`;
-            } else if (currentPage === 1 && (index === 1 || index === 2)) {
+            } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
                 cardClasses += ` w-full md:w-1/2 lg:w-1/2 medium-card`;
             } else {
                 cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
@@ -522,9 +651,9 @@
             let imageHtml = '';
             let placeholderSize = '600x400'; // Default placeholder size
 
-            if (currentPage === 1 && index === 0) {
+            if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
                 placeholderSize = '800x450';
-            } else if (currentPage === 1 && (index === 1 || index === 2)) {
+            } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
                 placeholderSize = '700x400';
             }
 
@@ -534,6 +663,9 @@
             } else {
                 imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
             }
+
+            const isBookmarked = bookmarkedArticles.some(a => a.url === article.url);
+            const bookmarkIconClass = isBookmarked ? 'fas fa-bookmark text-blue-500' : 'far fa-bookmark text-gray-500';
 
             newsCard.innerHTML = `
                 ${imageHtml}
@@ -548,11 +680,22 @@
                         Читать далее &rarr;
                     </a>
                     <div class="flex space-x-2">
+                        ${!isBookmarkOrHistory ? `
+                            <button class="bookmark-button p-2 rounded-full transition duration-150 ease-in-out hover:bg-gray-200 dark:hover:bg-gray-700" data-url="${article.url}">
+                                <i class="${bookmarkIconClass}"></i>
+                            </button>
+                        ` : ''}
                         <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
                             <i class="fab fa-twitter"></i>
                         </button>
                         <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
                             <i class="fab fa-facebook-f"></i>
+                        </button>
+                        <button class="share-button whatsapp text-green-500 hover:bg-green-500 hover:text-white" data-platform="whatsapp" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                            <i class="fab fa-whatsapp"></i>
+                        </button>
+                        <button class="share-button viber text-purple-500 hover:bg-purple-500 hover:text-white" data-platform="viber" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}">
+                            <i class="fab fa-viber"></i>
                         </button>
                         <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}">
                             <i class="fas fa-copy"></i>
@@ -571,9 +714,37 @@
                 });
             });
 
+            // Add event listener for bookmark button
+            if (!isBookmarkOrHistory) {
+                const bookmarkButton = newsCard.querySelector('.bookmark-button');
+                if (bookmarkButton) {
+                    bookmarkButton.addEventListener('click', () => {
+                        toggleBookmark(article);
+                        // Update icon immediately
+                        const icon = bookmarkButton.querySelector('i');
+                        if (bookmarkedArticles.some(a => a.url === article.url)) {
+                            icon.classList.remove('far', 'text-gray-500');
+                            icon.classList.add('fas', 'text-blue-500');
+                        } else {
+                            icon.classList.remove('fas', 'text-blue-500');
+                            icon.classList.add('far', 'text-gray-500');
+                        }
+                    });
+                }
+            }
+
+            // Add event listener for "Read More" link to track history
+            const readMoreLink = newsCard.querySelector('.read-more-link');
+            if (readMoreLink) {
+                readMoreLink.addEventListener('click', () => {
+                    addArticleToHistory(article);
+                });
+            }
+
             return newsCard;
         }
 
+        // --- Fetching and Displaying News ---
         /**
          * Fetches news articles from the backend API and displays them.
          * @param {boolean} reset - If true, clears existing news and resets page to 1.
@@ -613,6 +784,17 @@
                 if (selectedSourceIds.length > 0) {
                     urlParams.append('sources', selectedSourceIds.join(','));
                 }
+
+                // Save current filters to localStorage
+                localStorage.setItem('savedFilters', JSON.stringify({
+                    query: currentQuery,
+                    category: currentCategory,
+                    author: currentAuthor,
+                    language: currentLanguage,
+                    fromDate: fromDateInput.value,
+                    toDate: toDateInput.value,
+                    selectedSourceIds: selectedSourceIds
+                }));
 
                 const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
                 console.log(`Fetching news from: ${url}`);
@@ -659,6 +841,7 @@
             }
         }
 
+        // --- Source Selection Modal ---
         /**
          * Fetches all available sources from the backend.
          */
@@ -725,6 +908,7 @@
             checkboxes.forEach(checkbox => {
                 selectedSourceIds.push(checkbox.value);
             });
+            localStorage.setItem('selectedSourceIds', JSON.stringify(selectedSourceIds)); // Save selected sources
             hideSourcesModal();
             // Clear other filters when sources are applied
             currentQuery = '';
@@ -738,6 +922,7 @@
             fetchAndDisplayNews(true); // Re-fetch news with new sources
         }
 
+        // --- UI Updates ---
         // Function to update active category button styling
         function updateActiveCategoryButton(selectedCategory) {
             const buttons = categoryButtonsContainer.querySelectorAll('.category-button');
@@ -763,64 +948,125 @@
             });
         }
 
-        // Event listeners
+        // Function to update active navigation button styling
+        let currentPageView = 'main'; // Default view
+        function updateActiveNavButton(activeView) {
+            navButtons.forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.view === activeView) {
+                    button.classList.add('active');
+                }
+            });
+        }
+
+        // --- Page Rendering Logic ---
+        /**
+         * Renders the specified page view.
+         * @param {string} view - 'main', 'bookmarks', or 'history'.
+         */
+        function renderPage(view) {
+            mainPageView.classList.add('hidden');
+            bookmarksPageView.classList.add('hidden');
+            historyPageView.classList.add('hidden');
+
+            switch (view) {
+                case 'main':
+                    mainPageView.classList.remove('hidden');
+                    fetchAndDisplayNews(true); // Reload main news when returning
+                    break;
+                case 'bookmarks':
+                    bookmarksPageView.classList.remove('hidden');
+                    renderBookmarksPage();
+                    break;
+                case 'history':
+                    historyPageView.classList.remove('hidden');
+                    renderHistoryPage();
+                    break;
+            }
+            currentPageView = view;
+            updateActiveNavButton(view);
+        }
+
+        /**
+         * Renders the bookmarked articles page.
+         */
+        function renderBookmarksPage() {
+            bookmarksContainer.innerHTML = '';
+            if (bookmarkedArticles.length === 0) {
+                noBookmarksMessage.classList.remove('hidden');
+            } else {
+                noBookmarksMessage.classList.add('hidden');
+                bookmarkedArticles.forEach((article, index) => {
+                    // Pass isBookmarkOrHistory = true to hide bookmark button
+                    const newsCard = createNewsCard(article, index, true); 
+                    bookmarksContainer.appendChild(newsCard);
+                });
+            }
+        }
+
+        /**
+         * Renders the history articles page.
+         */
+        function renderHistoryPage() {
+            historyContainer.innerHTML = '';
+            if (viewedArticlesHistory.length === 0) {
+                noHistoryMessage.classList.remove('hidden');
+            } else {
+                noHistoryMessage.classList.add('hidden');
+                viewedArticlesHistory.forEach((article, index) => {
+                    // Pass isBookmarkOrHistory = true to hide bookmark button
+                    const newsCard = createNewsCard(article, index, true); 
+                    historyContainer.appendChild(newsCard);
+                });
+            }
+        }
+
+        // --- Event Listeners ---
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
             currentAuthor = '';
             authorSearchInput.value = '';
-            selectedSourceIds = []; 
+            fromDateInput.value = ''; // Clear date filters
+            toDateInput.value = '';   // Clear date filters
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true);
+            renderPage('main'); // Ensure we are on the main news page
         });
 
         searchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                currentQuery = searchInput.value.trim();
-                currentCategory = '';
-                currentAuthor = '';
-                authorSearchInput.value = '';
-                selectedSourceIds = []; 
-                updateActiveCategoryButton(currentCategory);
-                fetchAndDisplayNews(true);
+                searchButton.click();
             }
         });
 
-        // Author search event listeners
         authorSearchButton.addEventListener('click', () => {
             currentAuthor = authorSearchInput.value.trim();
             currentQuery = '';
             searchInput.value = '';
             currentCategory = '';
-            selectedSourceIds = [];
             fromDateInput.value = '';
             toDateInput.value = '';
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true);
+            renderPage('main'); // Ensure we are on the main news page
         });
 
         authorSearchInput.addEventListener('keypress', (event) => {
             if (event.key === 'Enter') {
-                currentAuthor = authorSearchInput.value.trim();
-                currentQuery = '';
-                searchInput.value = '';
-                currentCategory = '';
-                selectedSourceIds = [];
-                fromDateInput.value = '';
-                toDateInput.value = '';
-                updateActiveCategoryButton(currentCategory);
-                fetchAndDisplayNews(true);
+                authorSearchButton.click();
             }
         });
 
+        // Date filter change listeners
         fromDateInput.addEventListener('change', () => {
             currentQuery = searchInput.value.trim();
             currentCategory = '';
             currentAuthor = '';
             authorSearchInput.value = '';
-            selectedSourceIds = []; 
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true);
+            renderPage('main');
         });
 
         toDateInput.addEventListener('change', () => {
@@ -828,9 +1074,31 @@
             currentCategory = '';
             currentAuthor = '';
             authorSearchInput.value = '';
-            selectedSourceIds = []; 
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true);
+            renderPage('main');
+        });
+
+        // Quick date filter buttons
+        dateQuickButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const days = parseInt(button.dataset.days);
+                const today = new Date();
+                const fromDate = new Date();
+                fromDate.setDate(today.getDate() - days);
+
+                fromDateInput.value = fromDate.toISOString().split('T')[0];
+                toDateInput.value = today.toISOString().split('T')[0];
+
+                // Trigger search with new dates
+                currentQuery = searchInput.value.trim();
+                currentCategory = '';
+                currentAuthor = '';
+                authorSearchInput.value = '';
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main');
+            });
         });
 
         // Language select event listener
@@ -845,9 +1113,9 @@
             currentCategory = '';
             fromDateInput.value = '';
             toDateInput.value = '';
-            selectedSourceIds = [];
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
             updateActiveCategoryButton(currentCategory);
-            fetchAndDisplayNews(true); // Re-fetch news with new language
+            renderPage('main'); // Re-fetch news with new language
         });
 
         categoryButtonsContainer.addEventListener('click', (event) => {
@@ -860,9 +1128,9 @@
                 authorSearchInput.value = '';
                 fromDateInput.value = '';
                 toDateInput.value = '';
-                selectedSourceIds = [];
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
                 updateActiveCategoryButton(currentCategory);
-                fetchAndDisplayNews(true);
+                renderPage('main');
             }
         });
 
@@ -883,13 +1151,37 @@
         });
         applySourcesButton.addEventListener('click', applySelectedSources);
 
-        // Initial load
+        // Navigation button event listeners
+        navButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                renderPage(button.dataset.view);
+            });
+        });
+
+        // --- Initial Load and Saved Filters ---
         window.onload = () => {
             applySavedTheme();
             // Set initial language select value based on localStorage or default
             languageSelect.value = currentLanguage; 
             fetchSources(); // Fetch sources when page loads
-            fetchAndDisplayNews(true); // Start on the news section
+
+            // Load saved filters on startup
+            const savedFilters = JSON.parse(localStorage.getItem('savedFilters'));
+            if (savedFilters) {
+                searchInput.value = savedFilters.query || '';
+                currentQuery = savedFilters.query || '';
+                authorSearchInput.value = savedFilters.author || '';
+                currentAuthor = savedFilters.author || '';
+                fromDateInput.value = savedFilters.fromDate || '';
+                toDateInput.value = savedFilters.toDate || '';
+                currentCategory = savedFilters.category || '';
+                selectedSourceIds = savedFilters.selectedSourceIds || [];
+                languageSelect.value = savedFilters.language || 'ru';
+                currentLanguage = savedFilters.language || 'ru';
+            }
+
+            updateActiveCategoryButton(currentCategory);
+            renderPage('main'); // Start on the main news page
         };
     </script>
 </body>
