@@ -1,1066 +1,1218 @@
-<!DOCTYPE html>
-<html lang="ru" class="light">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Новости для студентов | Актуальные события, образование, карьера</title>
-    
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
-    <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
-    <meta name="author" content="Student News Aggregator">
-
-    <!-- Open Graph / Social Media Meta Tags (for better sharing previews) -->
-    <meta property="og:title" content="Новости для студентов | Актуальные события, образование, карьера">
-    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://studnews.ru/"> <!-- Обновлено на ваш новый домен -->
-    <meta property="og:image" content="https://studnews.ru/NSA.jpg"> <!-- Обновлено на ваш новый домен -->
-    <meta property="og:site_name" content="Student News Aggregator">
-
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .news-card {
-            border-radius: 0.75rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
-            overflow: hidden;
-            opacity: 0; /* Initial state for fade-in animation */
-            animation: fadeIn 0.5s ease-out forwards; /* Apply fade-in animation */
-            animation-delay: var(--animation-delay); /* Staggered animation */
-        }
-        .news-card:hover {
-            transform: translateY(-5px);
-        }
-        .news-card img {
-            width: 100%;
-            height: 180px; /* Default height for standard cards */
-            object-fit: cover;
-            border-top-left-radius: 0.75rem;
-            border-top-right-radius: 0.75rem;
-            margin-bottom: 1rem;
-        }
-        /* Style for the large card image */
-        .news-card.large-card img {
-            height: 250px; /* Taller image for the large card */
-        }
-        /* Style for medium cards image */
-        .news-card.medium-card img {
-            height: 200px; /* Slightly taller than standard, shorter than large */
-        }
-        .loading-spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-        }
-        .dark .loading-spinner {
-            border-color: rgba(255, 255, 255, 0.1);
-            border-left-color: #63b3ed;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        /* Keyframes for fade-in animation with slight translateY */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .category-button.active {
-            /* Handled by JS */
-        }
-        .share-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            border-radius: 9999px; /* rounded-full */
-            transition: background-color 0.2s ease, transform 0.2s ease;
-        }
-        .share-button:hover {
-            transform: translateY(-2px);
-        }
-        .share-button i {
-            font-size: 1.25rem; /* text-xl */
-        }
-        .share-button.twitter:hover { background-color: #1DA1F2; color: white; }
-        .share-button.facebook:hover { background-color: #1877F2; color: white; }
-        .share-button.copy:hover { background-color: #6B7280; color: white; } /* Gray-500 */
-        .share-button.whatsapp:hover { background-color: #25D366; color: white; } /* WhatsApp green */
-        .share-button.viber:hover { background-color: #7360F2; color: white; } /* Viber purple */
-
-
-        /* General UI Polish */
-        .main-title {
-            font-size: 2.75rem; /* Slightly larger title */
-            line-height: 1.2;
-        }
-        .subtitle {
-            font-size: 1.15rem; /* Slightly larger subtitle */
-        }
-        .news-card h2 {
-            font-size: 1.3rem; /* Slightly larger card title */
-            line-height: 1.4;
-        }
-        .news-card p {
-            font-size: 0.95rem; /* Slightly smaller snippet for better fit */
-        }
-        .read-more-link {
-            font-size: 0.9rem; /* Slightly smaller read more link */
-        }
-        .header-content {
-            display: flex;
-            align-items: center;
-            justify-content: center; /* Center content by default */
-            flex-wrap: wrap; /* Allow wrapping on small screens */
-            gap: 1rem; /* Space between items */
-        }
-        /* Adjust for smaller screens to stack elements */
-        @media (max-width: 640px) { /* Tailwind's sm breakpoint */
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-        }
-
-        /* Modal styles */
-        .modal {
-            position: fixed;
-            z-index: 100; /* High z-index to be on top */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border-radius: 0.75rem;
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            transform: translateY(-50px); /* Initial state for animation */
-            transition: transform 0.3s ease;
-            position: relative;
-            max-height: 80vh; /* Limit height for scrollable content */
-            display: flex;
-            flex-direction: column;
-        }
-        .modal.show .modal-content {
-            transform: translateY(0); /* Animate to original position */
-        }
-        .dark .modal-content {
-            background-color: #1f2937; /* Dark background for modal */
-            color: #f9fafb;
-        }
-        .close-button {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: #333;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        .dark .close-button {
-            color: #ccc;
-        }
-        .dark .close-button:hover {
-            color: #eee;
-        }
-        .sources-list {
-            max-height: 50vh; /* Make list scrollable */
-            overflow-y: auto;
-            padding-right: 10px; /* For scrollbar */
-            margin-bottom: 1rem;
-        }
-        .sources-list label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 0.5rem;
-            transition: background-color 0.2s ease;
-        }
-        .sources-list label:hover {
-            background-color: #f3f4f6; /* Light gray on hover */
-        }
-        .dark .sources-list label:hover {
-            background-color: #374151; /* Darker gray on hover */
-        }
-        .sources-list input[type="checkbox"] {
-            margin-right: 0.75rem;
-            transform: scale(1.2);
-        }
-
-        /* Style for active navigation button */
-        .nav-button.active {
-            background-color: #2563eb; /* Blue-600 */
-            color: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        .dark .nav-button.active {
-            background-color: #4b5563; /* Gray-700 */
-            color: #e5e7eb; /* Gray-200 */
-        }
-    </style>
-    <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
-    <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
-
-    <!-- Yandex.Metrika counter -->
-    <script type="text/javascript">
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=103520261', 'ym');
-
-        ym(103520261, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
-    </script>
-    <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
-    <!-- /Yandex.Metrika counter -->
-</head>
-<body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
-
-    <header class="w-full max-w-4xl text-center mb-8 relative">
-        <div class="header-content">
-            <!-- Your Profile Logo (NSA.jpg) -->
-            <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-20 w-20 rounded-full shadow-lg dark:shadow-xl transition-colors duration-300">
-            <div>
-                <h1 class="main-title font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
-                <p class="subtitle text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
-            </div>
-        </div>
+    <!DOCTYPE html>
+    <html lang="ru" class="light">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Новости для студентов | Актуальные события, образование, карьера</title>
         
-        <!-- Dark Mode Toggle Button -->
-        <button id="themeToggle" class="absolute top-0 right-0 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
-            <i class="fas fa-moon" id="themeIcon"></i>
-        </button>
-    </header>
+        <!-- SEO Meta Tags -->
+        <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+        <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
+        <meta name="author" content="Student News Aggregator">
 
-    <main class="w-full max-w-4xl flex flex-col items-center">
-        <!-- Navigation Buttons for different views -->
-        <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-4">
-            <button id="mainNewsNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out active" data-view="main">
-                <i class="fas fa-newspaper mr-2"></i> Главные новости
-            </button>
-            <button id="bookmarksNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="bookmarks">
-                <i class="fas fa-bookmark mr-2"></i> Мои закладки
-            </button>
-            <button id="historyNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="history">
-                <i class="fas fa-history mr-2"></i> История просмотров
-            </button>
-        </div>
+        <!-- Open Graph / Social Media Meta Tags (for better sharing previews) -->
+        <meta property="og:title" content="Новости для студентов | Актуальные события, образование, карьера">
+        <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://studnews.ru/"> <!-- Обновлено на ваш новый домен -->
+        <meta property="og:image" content="https://studnews.ru/NSA.jpg"> <!-- Обновлено на ваш новый домен -->
+        <meta property="og:site_name" content="Student News Aggregator">
 
-        <!-- Main News Section -->
-        <section id="mainPageView" class="w-full flex flex-col items-center">
-            <!-- Search Input and Button -->
-            <div class="w-full max-w-xl mb-4 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
-                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-                <button id="searchButton"
-                        class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Найти новости
-                </button>
-            </div>
-
-            <!-- Author Search Input and Button -->
-            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <input type="text" id="authorSearchInput" placeholder="Найти по автору (например, 'Иван Иванов')"
-                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-                <button id="authorSearchButton"
-                        class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Найти автора
-                </button>
-            </div>
-
-            <!-- Date Filter Inputs and Quick Buttons -->
-            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
-                <input type="date" id="fromDate"
-                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-                
-                <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
-                <input type="date" id="toDate"
-                       class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-            </div>
-            <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-2">
-                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="1">За 24 часа</button>
-                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="7">За 7 дней</button>
-                <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="30">За 30 дней</button>
-            </div>
-
-
-            <!-- Language and Source Selection Buttons -->
-            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
-                <div class="flex items-center space-x-2">
-                    <label for="languageSelect" class="text-gray-700 dark:text-gray-300">Язык:</label>
-                    <select id="languageSelect" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
-                        <option value="ru">Русский</option>
-                        <option value="en">English</option>
-                        <option value="de">Deutsch</option>
-                        <option value="fr">Français</option>
-                        <option value="es">Español</option>
-                        <option value="it">Italiano</option>
-                        <option value="pt">Português</option>
-                        <option value="zh">中文</option>
-                        <option value="ar">العربية</option>
-                    </select>
-                </div>
-                <button id="selectSourcesButton"
-                        class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Выбрать источники
-                </button>
-            </div>
-
-            <!-- Category Buttons -->
-            <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports"><i class="fas fa-futbol mr-2"></i>Спорт</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
-                <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment"><i class="fas fa-film mr-2"></i>Развлечения</button>
-            </div>
-
-            <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
-                <div class="loading-spinner mb-4"></div>
-                <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
-            </div>
-
-            <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
-                <!-- News articles will be injected here by JavaScript -->
-            </div>
-
-            <!-- Load More Button -->
-            <button id="loadMoreButton"
-                    class="hidden mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                Загрузить больше
-            </button>
-
-            <!-- Updated Error Message Container -->
-            <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
-                <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
-                <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
-            </div>
-
-            <!-- Feedback Section -->
-            <div class="w-full max-w-xl mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg text-center">
-                <h3 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Обратная связь</h3>
-                <p class="text-gray-700 dark:text-gray-300 mb-4">Мы ценим ваше мнение! Если у вас есть предложения, вопросы или вы заметили ошибку, пожалуйста, напишите нам:</p>
-                <a href="mailto:Shoxbro2007@gmail.com?subject=Обратная связь по Student News Aggregator" 
-                   class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Написать нам
-                </a>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                    (Ваш адрес электронной почты: Shoxbro2007@gmail.com)
-                </p>
-            </div>
-        </section>
-
-        <!-- Bookmarks Section -->
-        <section id="bookmarksPageView" class="w-full flex-col items-center hidden">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">Мои закладки</h2>
-            <div id="bookmarksContainer" class="flex flex-wrap gap-6 w-full">
-                <!-- Bookmarked articles will be injected here -->
-                <p id="noBookmarksMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">У вас пока нет сохраненных закладок.</p>
-            </div>
-        </section>
-
-        <!-- History Section -->
-        <section id="historyPageView" class="w-full flex-col items-center hidden">
-            <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">История просмотров</h2>
-            <div id="historyContainer" class="flex flex-wrap gap-6 w-full">
-                <!-- Viewed articles will be injected here -->
-                <p id="noHistoryMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">Ваша история просмотров пуста.</p>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- Sources Modal -->
-    <div id="sourcesModal" class="modal">
-        <div class="modal-content">
-            <span class="close-button" id="closeModalButton">&times;</span>
-            <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Выберите источники новостей</h2>
-            <div id="sourcesList" class="sources-list flex-grow">
-                <!-- Sources checkboxes will be loaded here -->
-                <p class="text-gray-600 dark:text-gray-300">Загрузка источников...</p>
-            </div>
-            <div class="flex justify-end mt-4">
-                <button id="applySourcesButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
-                    Применить
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script type="module">
-        // Get references to DOM elements
-        const mainPageView = document.getElementById('mainPageView');
-        const bookmarksPageView = document.getElementById('bookmarksPageView');
-        const historyPageView = document.getElementById('historyPageView');
-        const newsContainer = document.getElementById('newsContainer');
-        const bookmarksContainer = document.getElementById('bookmarksContainer');
-        const historyContainer = document.getElementById('historyContainer');
-        const noBookmarksMessage = document.getElementById('noBookmarksMessage');
-        const noHistoryMessage = document.getElementById('noHistoryMessage');
-
-        const loadingIndicator = document.getElementById('loadingIndicator');
-        const errorMessage = document.getElementById('errorMessage');
-        const errorText = document.getElementById('errorText');
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
-        const authorSearchInput = document.getElementById('authorSearchInput');
-        const authorSearchButton = document.getElementById('authorSearchButton');
-        const fromDateInput = document.getElementById('fromDate');
-        const toDateInput = document.getElementById('toDate');
-        const dateQuickButtons = document.querySelectorAll('.date-quick-button');
-        const languageSelect = document.getElementById('languageSelect');
-        const categoryButtonsContainer = document.getElementById('categoryButtons');
-        const loadMoreButton = document.getElementById('loadMoreButton');
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const htmlElement = document.documentElement;
-
-        // Navigation elements
-        const mainNewsNavButton = document.getElementById('mainNewsNavButton');
-        const bookmarksNavButton = document.getElementById('bookmarksNavButton');
-        const historyNavButton = document.getElementById('historyNavButton');
-        const navButtons = document.querySelectorAll('.nav-button');
-
-        // Source selection elements
-        const selectSourcesButton = document.getElementById('selectSourcesButton');
-        const sourcesModal = document.getElementById('sourcesModal');
-        const closeModalButton = document.getElementById('closeModalButton');
-        const sourcesListContainer = document.getElementById('sourcesList');
-        const applySourcesButton = document.getElementById('applySourcesButton');
-
-        let currentQuery = '';
-        let currentCategory = '';
-        let currentAuthor = '';
-        let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru';
-        let currentPage = 1;
-        let totalResults = 0;
-        let allSources = [];
-        let selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
-
-        // State for bookmarked and history articles
-        let bookmarkedArticles = JSON.parse(localStorage.getItem('bookmarkedArticles')) || [];
-        let viewedArticlesHistory = JSON.parse(localStorage.getItem('viewedArticlesHistory')) || [];
-
-        const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
-        const BASE_SITE_URL = 'https://studnews.ru/'; // Ваш новый домен
-
-        // --- Theme Toggling ---
-        /**
-         * Toggles between light and dark themes.
-         */
-        function toggleTheme() {
-            if (htmlElement.classList.contains('light')) {
-                htmlElement.classList.remove('light');
-                htmlElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-            } else {
-                htmlElement.classList.remove('dark');
-                htmlElement.classList.add('light');
-                localStorage.setItem('theme', 'light');
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
+        <!-- Tailwind CSS CDN -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <!-- Google Fonts - Inter -->
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <!-- Font Awesome for icons -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <style>
+            body {
+                font-family: 'Inter', sans-serif;
+                transition: background-color 0.3s ease, color 0.3s ease;
             }
-            updateActiveCategoryButton(currentCategory);
-            updateActiveNavButton(currentPageView); // Update nav button colors on theme change
-        }
-
-        /**
-         * Applies the saved theme preference on page load.
-         */
-        function applySavedTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                htmlElement.classList.add('dark');
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-            } else {
-                htmlElement.classList.add('light');
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
+            .news-card {
+                border-radius: 0.75rem;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                transition: transform 0.2s ease-in-out, background-color 0.3s ease, box-shadow 0.3s ease;
+                overflow: hidden;
+                opacity: 0; /* Initial state for fade-in animation */
+                animation: fadeIn 0.5s ease-out forwards; /* Apply fade-in animation */
+                animation-delay: var(--animation-delay); /* Staggered animation */
             }
-        }
-
-        // --- Sharing Functionality ---
-        /**
-         * Handles sharing an article.
-         * @param {string} platform - 'twitter', 'facebook', 'copy', 'whatsapp', 'viber'.
-         * @param {string} url - The URL of the article (original source).
-         * @param {string} title - The title/snippet of the article.
-         * @param {string} sourceId - The ID of the news source.
-         */
-        function shareArticle(platform, url, title, sourceId) {
-            // Construct the URL to your site with parameters for search
-            const sharedSiteUrl = `${BASE_SITE_URL}?q=${encodeURIComponent(title || '')}&s=${encodeURIComponent(sourceId || '')}`;
-            const text = encodeURIComponent(`Читайте: "${title}" на Student News Aggregator: ${sharedSiteUrl}`);
-
-            let shareUrl = '';
-            switch (platform) {
-                case 'twitter':
-                    shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(sharedSiteUrl)}&text=${encodeURIComponent(title)}`;
-                    window.open(shareUrl, '_blank');
-                    break;
-                case 'facebook':
-                    shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharedSiteUrl)}`;
-                    window.open(shareUrl, '_blank');
-                    break;
-                case 'copy':
-                    const tempInput = document.createElement('textarea');
-                    tempInput.value = sharedSiteUrl; // Copy your site's URL with params
-                    document.body.appendChild(tempInput);
-                    tempInput.select();
-                    try {
-                        document.execCommand('copy');
-                        alert('Ссылка на статью на вашем сайте скопирована в буфер обмена!');
-                    } catch (err) {
-                        console.error('Не удалось скопировать текст: ', err);
-                        alert('Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + sharedSiteUrl);
-                    } finally {
-                        document.body.removeChild(tempInput);
-                    }
-                    break;
-                case 'whatsapp':
-                    shareUrl = `https://api.whatsapp.com/send?text=${text}`;
-                    window.open(shareUrl, '_blank');
-                    break;
-                case 'viber':
-                    shareUrl = `viber://forward?text=${text}`;
-                    window.open(shareUrl, '_blank');
-                    break;
+            .news-card:hover {
+                transform: translateY(-5px);
             }
-        }
-
-        // --- Bookmark and History Management ---
-        /**
-         * Toggles an article's bookmark status.
-         * @param {Object} article - The article to bookmark/unbookmark.
-         */
-        function toggleBookmark(article) {
-            const index = bookmarkedArticles.findIndex(a => a.url === article.url);
-            if (index > -1) {
-                bookmarkedArticles.splice(index, 1); // Remove
-                alert('Статья удалена из закладок!');
-            } else {
-                bookmarkedArticles.unshift(article); // Add to beginning
-                alert('Статья добавлена в закладки!');
+            .news-card img {
+                width: 100%;
+                height: 180px; /* Default height for standard cards */
+                object-fit: cover;
+                border-top-left-radius: 0.75rem;
+                border-top-right-radius: 0.75rem;
+                margin-bottom: 1rem;
             }
-            localStorage.setItem('bookmarkedArticles', JSON.stringify(bookmarkedArticles));
-            // If on bookmarks page, re-render
-            if (currentPageView === 'bookmarks') {
-                renderBookmarksPage();
+            /* Style for the large card image */
+            .news-card.large-card img {
+                height: 250px; /* Taller image for the large card */
             }
-        }
-
-        /**
-         * Adds an article to the history.
-         * @param {Object} article - The article to add to history.
-         */
-        function addArticleToHistory(article) {
-            // Remove if already exists to move to top
-            const index = viewedArticlesHistory.findIndex(a => a.url === article.url);
-            if (index > -1) {
-                viewedArticlesHistory.splice(index, 1);
+            /* Style for medium cards image */
+            .news-card.medium-card img {
+                height: 200px; /* Slightly taller than standard, shorter than large */
             }
-            viewedArticlesHistory.unshift(article); // Add to beginning
-            // Keep history limited, e.g., to 50 articles
-            if (viewedArticlesHistory.length > 50) {
-                viewedArticlesHistory = viewedArticlesHistory.slice(0, 50);
+            .loading-spinner {
+                border: 4px solid rgba(0, 0, 0, 0.1);
+                border-left-color: #2563eb;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                animation: spin 1s linear infinite;
             }
-            localStorage.setItem('viewedArticlesHistory', JSON.stringify(viewedArticlesHistory));
-        }
-
-        // --- News Card Creation ---
-        /**
-         * Creates a news card element.
-         * @param {Object} article - The article data.
-         * @param {number} index - The index of the article (for layout and animation delay).
-         * @param {boolean} isBookmarkOrHistory - True if rendering for bookmarks/history page (no bookmark button, different styling for 'read more').
-         * @returns {HTMLElement} The created news card element.
-         */
-        function createNewsCard(article, index, isBookmarkOrHistory = false) {
-            const newsCard = document.createElement('div');
-            let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
-            
-            // Apply different layout based on index and current page for main view
-            if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
-                cardClasses += ` w-full md:w-full lg:w-full large-card`;
-            } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
-                cardClasses += ` w-full md:w-1/2 lg:w-1/2 medium-card`;
-            } else {
-                cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
+            .dark .loading-spinner {
+                border-color: rgba(255, 255, 255, 0.1);
+                border-left-color: #63b3ed;
             }
-            newsCard.className = cardClasses;
-            newsCard.style.setProperty('--animation-delay', `${index * 0.05}s`); // Staggered animation delay
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            /* Keyframes for fade-in animation with slight translateY */
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .category-button.active {
+                /* Handled by JS */
+            }
+            .share-button {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0.5rem;
+                border-radius: 9999px; /* rounded-full */
+                transition: background-color 0.2s ease, transform 0.2s ease;
+            }
+            .share-button:hover {
+                transform: translateY(-2px);
+            }
+            .share-button i {
+                font-size: 1.25rem; /* text-xl */
+            }
+            .share-button.twitter:hover { background-color: #1DA1F2; color: white; }
+            .share-button.facebook:hover { background-color: #1877F2; color: white; }
+            .share-button.copy:hover { background-color: #6B7280; color: white; } /* Gray-500 */
+            .share-button.whatsapp:hover { background-color: #25D366; color: white; } /* WhatsApp green */
+            .share-button.viber:hover { background-color: #7360F2; color: white; } /* Viber purple */
 
-            let imageHtml = '';
-            let placeholderSize = '600x400'; // Default placeholder size
 
-            if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
-                placeholderSize = '800x450';
-            } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
-                placeholderSize = '700x400';
+            /* General UI Polish */
+            .main-title {
+                font-size: 2.75rem; /* Slightly larger title */
+                line-height: 1.2;
+            }
+            .subtitle {
+                font-size: 1.15rem; /* Slightly larger subtitle */
+            }
+            .news-card h2 {
+                font-size: 1.3rem; /* Slightly larger card title */
+                line-height: 1.4;
+            }
+            .news-card p {
+                font-size: 0.95rem; /* Slightly smaller snippet for better fit */
+            }
+            .read-more-link {
+                font-size: 0.9rem; /* Slightly smaller read more link */
+            }
+            .header-content {
+                display: flex;
+                align-items: center;
+                justify-content: center; /* Center content by default */
+                flex-wrap: wrap; /* Allow wrapping on small screens */
+                gap: 1rem; /* Space between items */
+            }
+            /* Adjust for smaller screens to stack elements */
+            @media (max-width: 640px) { /* Tailwind's sm breakpoint */
+                .header-content {
+                    flex-direction: column;
+                    text-align: center;
+                }
             }
 
-            if (article.image_url) {
-                imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" loading="lazy"
-                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
-            } else {
-                imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
+            /* Modal styles */
+            .modal {
+                position: fixed;
+                z-index: 100; /* High z-index to be on top */
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+                background-color: rgba(0, 0, 0, 0.7); /* Dark overlay */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                visibility: hidden;
+                transition: opacity 0.3s ease, visibility 0.3s ease;
+            }
+            .modal.show {
+                opacity: 1;
+                visibility: visible;
+            }
+            .modal-content {
+                background-color: #fefefe;
+                margin: auto;
+                padding: 20px;
+                border-radius: 0.75rem;
+                width: 90%;
+                max-width: 600px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+                transform: translateY(-50px); /* Initial state for animation */
+                transition: transform 0.3s ease;
+                position: relative;
+                max-height: 80vh; /* Limit height for scrollable content */
+                display: flex;
+                flex-direction: column;
+            }
+            .modal.show .modal-content {
+                transform: translateY(0); /* Animate to original position */
+            }
+            .dark .modal-content {
+                background-color: #1f2937; /* Dark background for modal */
+                color: #f9fafb;
+            }
+            .close-button {
+                position: absolute;
+                top: 10px;
+                right: 15px;
+                font-size: 28px;
+                font-weight: bold;
+                color: #aaa;
+                cursor: pointer;
+                transition: color 0.2s ease;
+            }
+            .close-button:hover,
+            .close-button:focus {
+                color: #333;
+                text-decoration: none;
+                cursor: pointer;
+            }
+            .dark .close-button {
+                color: #ccc;
+            }
+            .dark .close-button:hover {
+                color: #eee;
+            }
+            .sources-list {
+                max-height: 50vh; /* Make list scrollable */
+                overflow-y: auto;
+                padding-right: 10px; /* For scrollbar */
+                margin-bottom: 1rem;
+            }
+            .sources-list label {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.5rem;
+                cursor: pointer;
+                padding: 0.5rem;
+                border-radius: 0.5rem;
+                transition: background-color 0.2s ease;
+            }
+            .sources-list label:hover {
+                background-color: #f3f4f6; /* Light gray on hover */
+            }
+            .dark .sources-list label:hover {
+                background-color: #374151; /* Darker gray on hover */
+            }
+            .sources-list input[type="checkbox"] {
+                margin-right: 0.75rem;
+                transform: scale(1.2);
             }
 
-            const isBookmarked = bookmarkedArticles.some(a => a.url === article.url);
-            const bookmarkIconClass = isBookmarked ? 'fas fa-bookmark text-blue-500' : 'far fa-bookmark text-gray-500';
+            /* Style for active navigation button */
+            .nav-button.active {
+                background-color: #2563eb; /* Blue-600 */
+                color: white;
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .dark .nav-button.active {
+                background-color: #4b5563; /* Gray-700 */
+                color: #e5e7eb; /* Gray-200 */
+            }
 
-            newsCard.innerHTML = `
-                ${imageHtml}
+            /* Styles for summarization */
+            .summary-content {
+                margin-top: 1rem;
+                padding: 0.75rem;
+                background-color: #e0f2fe; /* Light blue */
+                border-radius: 0.5rem;
+                font-style: italic;
+                color: #0c4a6e; /* Darker blue text */
+            }
+            .dark .summary-content {
+                background-color: #1a202c; /* Darker background */
+                color: #a0aec0; /* Lighter text */
+            }
+            .summary-loading-spinner {
+                border: 2px solid rgba(0, 0, 0, 0.1);
+                border-left-color: #2563eb;
+                border-radius: 50%;
+                width: 20px;
+                height: 20px;
+                animation: spin 1s linear infinite;
+                display: inline-block;
+                margin-left: 0.5rem;
+            }
+            .dark .summary-loading-spinner {
+                border-color: rgba(255, 255, 255, 0.1);
+                border-left-color: #63b3ed;
+            }
+        </style>
+        <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
+        <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
+
+        <!-- Yandex.Metrika counter -->
+        <script type="text/javascript">
+            (function(m,e,t,r,i,k,a){
+                m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+                m[i].l=1*new Date();
+                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+            })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=103520261', 'ym');
+
+            ym(103520261, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
+        </script>
+        <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+        <!-- /Yandex.Metrika counter -->
+    </head>
+    <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+        <header class="w-full max-w-4xl text-center mb-8 relative">
+            <div class="header-content">
+                <!-- Your Profile Logo (NSA.jpg) -->
+                <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-20 w-20 rounded-full shadow-lg dark:shadow-xl transition-colors duration-300">
                 <div>
-                    <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
-                    <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Автор: ${article.author || 'Неизвестно'}</p>
+                    <h1 class="main-title font-bold mb-2 text-gray-800 dark:text-white transition-colors duration-300">Главные новости для студентов</h1>
+                    <p class="subtitle text-gray-600 dark:text-gray-300 transition-colors duration-300">Будьте в курсе последних событий, советов и возможностей!</p>
                 </div>
-                <div class="flex items-center justify-between mt-4">
-                    <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
-                       class="read-more-link inline-block font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
-                        Читать далее &rarr;
-                    </a>
-                    <div class="flex space-x-2">
-                        ${!isBookmarkOrHistory ? `
-                            <button class="bookmark-button p-2 rounded-full transition duration-150 ease-in-out hover:bg-gray-200 dark:hover:bg-gray-700" data-url="${article.url}">
-                                <i class="${bookmarkIconClass}"></i>
-                            </button>
-                        ` : ''}
-                        <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
-                            <i class="fab fa-twitter"></i>
-                        </button>
-                        <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
-                            <i class="fab fa-facebook-f"></i>
-                        </button>
-                        <button class="share-button whatsapp text-green-500 hover:bg-green-500 hover:text-white" data-platform="whatsapp" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
-                            <i class="fab fa-whatsapp"></i>
-                        </button>
-                        <button class="share-button viber text-purple-500 hover:bg-purple-500 hover:text-white" data-platform="viber" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
-                            <i class="fab fa-viber"></i>
-                        </button>
-                        <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
-                            <i class="fas fa-copy"></i>
-                        </button>
+            </div>
+            
+            <!-- Dark Mode Toggle Button -->
+            <button id="themeToggle" class="absolute top-0 right-0 p-3 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-300">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </header>
+
+        <main class="w-full max-w-4xl flex flex-col items-center">
+            <!-- Navigation Buttons for different views -->
+            <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-4">
+                <button id="mainNewsNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out active" data-view="main">
+                    <i class="fas fa-newspaper mr-2"></i> Главные новости
+                </button>
+                <button id="bookmarksNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="bookmarks">
+                    <i class="fas fa-bookmark mr-2"></i> Мои закладки
+                </button>
+                <button id="historyNavButton" class="nav-button px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-semibold rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 ease-in-out" data-view="history">
+                    <i class="fas fa-history mr-2"></i> История просмотров
+                </button>
+            </div>
+
+            <!-- Main News Section -->
+            <section id="mainPageView" class="w-full flex flex-col items-center">
+                <!-- Search Input and Button -->
+                <div class="w-full max-w-xl mb-4 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
+                           class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                    <button id="searchButton"
+                            class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        Найти новости
+                    </button>
+                </div>
+
+                <!-- Author Search Input and Button -->
+                <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <input type="text" id="authorSearchInput" placeholder="Найти по автору (например, 'Иван Иванов')"
+                           class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                    <button id="authorSearchButton"
+                            class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        Найти автора
+                    </button>
+                </div>
+
+                <!-- Date Filter Inputs and Quick Buttons -->
+                <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
+                    <input type="date" id="fromDate"
+                           class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                    
+                    <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
+                    <input type="date" id="toDate"
+                           class="flex-grow w-full sm:w-auto p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                </div>
+                <div class="w-full max-w-xl mb-8 flex flex-wrap justify-center gap-2">
+                    <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="1">За 24 часа</button>
+                    <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="7">За 7 дней</button>
+                    <button class="date-quick-button px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-150 ease-in-out" data-days="30">За 30 дней</button>
+                </div>
+
+
+                <!-- Language and Source Selection Buttons -->
+                <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
+                    <div class="flex items-center space-x-2">
+                        <label for="languageSelect" class="text-gray-700 dark:text-gray-300">Язык:</label>
+                        <select id="languageSelect" class="p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800 dark:bg-gray-700 dark:border-gray-600 dark:text-white transition-colors duration-300">
+                            <option value="ru">Русский</option>
+                            <option value="en">English</option>
+                            <option value="de">Deutsch</option>
+                            <option value="fr">Français</option>
+                            <option value="es">Español</option>
+                            <option value="it">Italiano</option>
+                            <option value="pt">Português</option>
+                            <option value="zh">中文</option>
+                            <option value="ar">العربية</option>
+                        </select>
                     </div>
+                    <button id="selectSourcesButton"
+                            class="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        Выбрать источники
+                    </button>
                 </div>
-            `;
 
-            // Add event listeners for share buttons
-            newsCard.querySelectorAll('.share-button').forEach(button => {
-                button.addEventListener('click', () => {
-                    const platform = button.dataset.platform;
-                    const url = button.dataset.url; // Original article URL
-                    const title = button.dataset.title;
-                    const sourceId = button.dataset.sourceId; // Source ID
-                    shareArticle(platform, url, title, sourceId);
-                });
-            });
+                <!-- Category Buttons -->
+                <div id="categoryButtons" class="w-full max-w-4xl mb-8 flex flex-wrap justify-center gap-2">
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science"><i class="fas fa-flask mr-2"></i>Наука</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports"><i class="fas fa-futbol mr-2"></i>Спорт</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
+                    <button class="category-button px-4 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment"><i class="fas fa-film mr-2"></i>Развлечения</button>
+                </div>
 
-            // Add event listener for "Read More" link to track history
-            const readMoreLink = newsCard.querySelector('.read-more-link');
-            if (readMoreLink) {
-                readMoreLink.addEventListener('click', () => {
-                    addArticleToHistory(article);
-                });
+                <div id="loadingIndicator" class="flex flex-col items-center justify-center py-12">
+                    <div class="loading-spinner mb-4"></div>
+                    <p class="text-gray-600 dark:text-gray-300 text-lg transition-colors duration-300">Загрузка последних новостей...</p>
+                </div>
+
+                <div id="newsContainer" class="flex flex-wrap gap-6 w-full hidden">
+                    <!-- News articles will be injected here by JavaScript -->
+                </div>
+
+                <!-- Load More Button -->
+                <button id="loadMoreButton"
+                        class="hidden mt-8 px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                    Загрузить больше
+                </button>
+
+                <!-- Updated Error Message Container -->
+                <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-8 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300">
+                    <p id="errorText" class="font-semibold">Произошла ошибка при загрузке новостей.</p>
+                    <p>Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
+                </div>
+
+                <!-- Feedback Section -->
+                <div class="w-full max-w-xl mt-12 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg text-center">
+                    <h3 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Обратная связь</h3>
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">Мы ценим ваше мнение! Если у вас есть предложения, вопросы или вы заметили ошибку, пожалуйста, напишите нам:</p>
+                    <a href="mailto:Shoxbro2007@gmail.com?subject=Обратная связь по Student News Aggregator" 
+                       class="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        Написать нам
+                    </a>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        (Ваш адрес электронной почты: Shoxbro2007@gmail.com)
+                    </p>
+                </div>
+            </section>
+
+            <!-- Bookmarks Section -->
+            <section id="bookmarksPageView" class="w-full flex-col items-center hidden">
+                <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">Мои закладки</h2>
+                <div id="bookmarksContainer" class="flex flex-wrap gap-6 w-full">
+                    <!-- Bookmarked articles will be injected here -->
+                    <p id="noBookmarksMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">У вас пока нет сохраненных закладок.</p>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="historyPageView" class="w-full flex-col items-center hidden">
+                <h2 class="text-3xl font-bold mb-8 text-gray-800 dark:text-white transition-colors duration-300">История просмотров</h2>
+                <div id="historyContainer" class="flex flex-wrap gap-6 w-full">
+                    <!-- Viewed articles will be injected here -->
+                    <p id="noHistoryMessage" class="text-gray-600 dark:text-gray-300 text-lg text-center w-full">Ваша история просмотров пуста.</p>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Sources Modal -->
+        <div id="sourcesModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" id="closeModalButton">&times;</span>
+                <h2 class="text-2xl font-bold mb-4 text-gray-900 dark:text-gray-100">Выберите источники новостей</h2>
+                <div id="sourcesList" class="sources-list flex-grow">
+                    <!-- Sources checkboxes will be loaded here -->
+                    <p class="text-gray-600 dark:text-gray-300">Загрузка источников...</p>
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="applySourcesButton" class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                        Применить
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script type="module">
+            // Get references to DOM elements
+            const mainPageView = document.getElementById('mainPageView');
+            const bookmarksPageView = document.getElementById('bookmarksPageView');
+            const historyPageView = document.getElementById('historyPageView');
+            const newsContainer = document.getElementById('newsContainer');
+            const bookmarksContainer = document.getElementById('bookmarksContainer');
+            const historyContainer = document.getElementById('historyContainer');
+            const noBookmarksMessage = document.getElementById('noBookmarksMessage');
+            const noHistoryMessage = document.getElementById('noHistoryMessage');
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const searchInput = document.getElementById('searchInput');
+            const searchButton = document.getElementById('searchButton');
+            const authorSearchInput = document.getElementById('authorSearchInput');
+            const authorSearchButton = document.getElementById('authorSearchButton');
+            const fromDateInput = document.getElementById('fromDate');
+            const toDateInput = document.getElementById('toDate');
+            const dateQuickButtons = document.querySelectorAll('.date-quick-button');
+            const languageSelect = document.getElementById('languageSelect');
+            const categoryButtonsContainer = document.getElementById('categoryButtons');
+            const loadMoreButton = document.getElementById('loadMoreButton');
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const htmlElement = document.documentElement;
+
+            // Navigation elements
+            const mainNewsNavButton = document.getElementById('mainNewsNavButton');
+            const bookmarksNavButton = document.getElementById('bookmarksNavButton');
+            const historyNavButton = document.getElementById('historyNavButton');
+            const navButtons = document.querySelectorAll('.nav-button');
+
+            // Source selection elements
+            const selectSourcesButton = document.getElementById('selectSourcesButton');
+            const sourcesModal = document.getElementById('sourcesModal');
+            const closeModalButton = document.getElementById('closeModalButton');
+            const sourcesListContainer = document.getElementById('sourcesList');
+            const applySourcesButton = document.getElementById('applySourcesButton');
+
+            let currentQuery = '';
+            let currentCategory = '';
+            let currentAuthor = '';
+            let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru';
+            let currentPage = 1;
+            let totalResults = 0;
+            let allSources = [];
+            let selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+
+            // State for bookmarked and history articles
+            let bookmarkedArticles = JSON.parse(localStorage.getItem('bookmarkedArticles')) || [];
+            let viewedArticlesHistory = JSON.parse(localStorage.getItem('viewedArticlesHistory')) || [];
+
+            const BACKEND_API_URL = 'https://shoxbro2007.pythonanywhere.com/api';
+            const BASE_SITE_URL = 'https://studnews.ru/'; // Ваш новый домен
+
+            // --- Theme Toggling ---
+            /**
+             * Toggles between light and dark themes.
+             */
+            function toggleTheme() {
+                if (htmlElement.classList.contains('light')) {
+                    htmlElement.classList.remove('light');
+                    htmlElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    htmlElement.classList.remove('dark');
+                    htmlElement.classList.add('light');
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
+                updateActiveCategoryButton(currentCategory);
+                updateActiveNavButton(currentPageView); // Update nav button colors on theme change
             }
 
-            return newsCard;
-        }
-
-        // --- Fetching and Displaying News ---
-        /**
-         * Fetches news articles from the backend API and displays them.
-         * @param {boolean} reset - If true, clears existing news and resets page to 1.
-         */
-        async function fetchAndDisplayNews(reset = true) {
-            if (reset) {
-                currentPage = 1;
-                newsContainer.innerHTML = '';
-                newsContainer.classList.add('hidden');
-                loadMoreButton.classList.add('hidden');
+            /**
+             * Applies the saved theme preference on page load.
+             */
+            function applySavedTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                if (savedTheme === 'dark') {
+                    htmlElement.classList.add('dark');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                } else {
+                    htmlElement.classList.add('light');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                }
             }
 
-            loadingIndicator.classList.remove('hidden');
-            errorMessage.classList.add('hidden');
-            errorText.textContent = '';
+            // --- Sharing Functionality ---
+            /**
+             * Handles sharing an article.
+             * @param {string} platform - 'twitter', 'facebook', 'copy', 'whatsapp', 'viber'.
+             * @param {string} url - The URL of the article (original source).
+             * @param {string} title - The title/snippet of the article.
+             * @param {string} sourceId - The ID of the news source.
+             */
+            function shareArticle(platform, url, title, sourceId) {
+                // Construct the URL to your site with parameters for search
+                const sharedSiteUrl = `${BASE_SITE_URL}?q=${encodeURIComponent(title || '')}&s=${encodeURIComponent(sourceId || '')}`;
+                const text = encodeURIComponent(`Читайте: "${title}" на Student News Aggregator: ${sharedSiteUrl}`);
 
-            try {
-                const urlParams = new URLSearchParams();
-                if (currentQuery) {
-                    urlParams.append('query', currentQuery);
+                let shareUrl = '';
+                switch (platform) {
+                    case 'twitter':
+                        shareUrl = `https://twitter.com/intent/tweet?url=${encodeURIComponent(sharedSiteUrl)}&text=${encodeURIComponent(title)}`;
+                        window.open(shareUrl, '_blank');
+                        break;
+                    case 'facebook':
+                        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(sharedSiteUrl)}`;
+                        window.open(shareUrl, '_blank');
+                        break;
+                    case 'copy':
+                        const tempInput = document.createElement('textarea');
+                        tempInput.value = sharedSiteUrl; // Copy your site's URL with params
+                        document.body.appendChild(tempInput);
+                        tempInput.select();
+                        try {
+                            document.execCommand('copy');
+                            // Use a simple message instead of alert
+                            const messageBox = document.createElement('div');
+                            messageBox.textContent = 'Ссылка на статью на вашем сайте скопирована в буфер обмена!';
+                            messageBox.style.cssText = `
+                                position: fixed;
+                                top: 20px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                background-color: #4CAF50;
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                z-index: 1000;
+                                opacity: 0;
+                                transition: opacity 0.5s ease-in-out;
+                            `;
+                            document.body.appendChild(messageBox);
+                            setTimeout(() => {
+                                messageBox.style.opacity = 1;
+                            }, 10);
+                            setTimeout(() => {
+                                messageBox.style.opacity = 0;
+                                messageBox.addEventListener('transitionend', () => messageBox.remove());
+                            }, 3000);
+                        } catch (err) {
+                            console.error('Не удалось скопировать текст: ', err);
+                            // Use a simple message instead of alert
+                            const messageBox = document.createElement('div');
+                            messageBox.textContent = 'Не удалось скопировать ссылку. Пожалуйста, скопируйте вручную: ' + sharedSiteUrl;
+                            messageBox.style.cssText = `
+                                position: fixed;
+                                top: 20px;
+                                left: 50%;
+                                transform: translateX(-50%);
+                                background-color: #f44336;
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 5px;
+                                z-index: 1000;
+                                opacity: 0;
+                                transition: opacity 0.5s ease-in-out;
+                            `;
+                            document.body.appendChild(messageBox);
+                            setTimeout(() => {
+                                messageBox.style.opacity = 1;
+                            }, 10);
+                            setTimeout(() => {
+                                messageBox.style.opacity = 0;
+                                messageBox.addEventListener('transitionend', () => messageBox.remove());
+                            }, 5000);
+                        } finally {
+                            document.body.removeChild(tempInput);
+                        }
+                        break;
+                    case 'whatsapp':
+                        shareUrl = `https://api.whatsapp.com/send?text=${text}`;
+                        window.open(shareUrl, '_blank');
+                        break;
+                    case 'viber':
+                        shareUrl = `viber://forward?text=${text}`;
+                        window.open(shareUrl, '_blank');
+                        break;
                 }
-                if (currentCategory) {
-                    urlParams.append('category', currentCategory);
+            }
+
+            // --- Bookmark and History Management ---
+            /**
+             * Toggles an article's bookmark status.
+             * @param {Object} article - The article to bookmark/unbookmark.
+             */
+            function toggleBookmark(article) {
+                const index = bookmarkedArticles.findIndex(a => a.url === article.url);
+                let message = '';
+                let bgColor = '';
+
+                if (index > -1) {
+                    bookmarkedArticles.splice(index, 1); // Remove
+                    message = 'Статья удалена из закладок!';
+                    bgColor = '#f44336'; // Red for removal
+                } else {
+                    bookmarkedArticles.unshift(article); // Add to beginning
+                    message = 'Статья добавлена в закладки!';
+                    bgColor = '#4CAF50'; // Green for addition
                 }
-                if (currentAuthor) {
-                    urlParams.append('author', currentAuthor);
-                }
-                urlParams.append('language', currentLanguage);
-                urlParams.append('page', currentPage);
+                localStorage.setItem('bookmarkedArticles', JSON.stringify(bookmarkedArticles));
                 
-                if (fromDateInput.value) {
-                    urlParams.append('from_date', fromDateInput.value);
+                // Display custom message
+                const messageBox = document.createElement('div');
+                messageBox.textContent = message;
+                messageBox.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background-color: ${bgColor};
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 1000;
+                    opacity: 0;
+                    transition: opacity 0.5s ease-in-out;
+                `;
+                document.body.appendChild(messageBox);
+                setTimeout(() => {
+                    messageBox.style.opacity = 1;
+                }, 10);
+                setTimeout(() => {
+                    messageBox.style.opacity = 0;
+                    messageBox.addEventListener('transitionend', () => messageBox.remove());
+                }, 3000); // Message disappears after 3 seconds
+
+                // If on bookmarks page, re-render
+                if (currentPageView === 'bookmarks') {
+                    renderBookmarksPage();
                 }
-                if (toDateInput.value) {
-                    urlParams.append('to_date', toDateInput.value);
+            }
+
+            /**
+             * Adds an article to the history.
+             * @param {Object} article - The article to add to history.
+             */
+            function addArticleToHistory(article) {
+                // Remove if already exists to move to top
+                const index = viewedArticlesHistory.findIndex(a => a.url === article.url);
+                if (index > -1) {
+                    viewedArticlesHistory.splice(index, 1);
                 }
-                if (selectedSourceIds.length > 0) {
-                    urlParams.append('sources', selectedSourceIds.join(','));
+                viewedArticlesHistory.unshift(article); // Add to beginning
+                // Keep history limited, e.g., to 50 articles
+                if (viewedArticlesHistory.length > 50) {
+                    viewedArticlesHistory = viewedArticlesHistory.slice(0, 50);
                 }
+                localStorage.setItem('viewedArticlesHistory', JSON.stringify(viewedArticlesHistory));
+            }
 
-                // Save current filters to localStorage
-                localStorage.setItem('savedFilters', JSON.stringify({
-                    query: currentQuery,
-                    category: currentCategory,
-                    author: currentAuthor,
-                    language: currentLanguage,
-                    fromDate: fromDateInput.value,
-                    toDate: toDateInput.value,
-                    selectedSourceIds: selectedSourceIds
-                }));
+            // --- AI Summarization ---
+            /**
+             * Fetches an AI summary for a given article text.
+             * @param {string} articleText - The text of the article to summarize.
+             * @param {HTMLElement} summaryContainer - The DOM element to display the summary in.
+             * @param {HTMLElement} summarizeButton - The button that triggered the summarization.
+             */
+            async function fetchAISummary(articleText, summaryContainer, summarizeButton) {
+                summaryContainer.innerHTML = '<div class="summary-loading-spinner"></div> Загрузка резюме...';
+                summaryContainer.classList.remove('hidden');
+                summarizeButton.disabled = true; // Disable button during loading
 
-                const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
-                console.log(`Fetching news from: ${url}`);
-
-                const response = await fetch(url);
-
-                if (!response.ok) {
-                    const errorJson = await response.json();
-                    const apiError = errorJson.error || `HTTP error! Status: ${response.status}`;
-                    throw new Error(apiError);
-                }
-
-                const data = await response.json();
-                const articles = data.articles;
-                totalResults = data.totalResults;
-
-                if (articles && articles.length > 0) {
-                    articles.forEach((article, index) => {
-                        const newsCard = createNewsCard(article, index);
-                        newsContainer.appendChild(newsCard);
+                try {
+                    const response = await fetch(`${BACKEND_API_URL}/summarize`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ article_text: articleText })
                     });
-                    newsContainer.classList.remove('hidden');
 
-                    if (newsContainer.children.length < totalResults) {
-                        loadMoreButton.classList.remove('hidden');
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Ошибка при получении резюме от AI.');
+                    }
+
+                    const data = await response.json();
+                    summaryContainer.innerHTML = `<p>${data.summary}</p>`;
+                } catch (error) {
+                    console.error("Error fetching AI summary:", error);
+                    summaryContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Ошибка: ${error.message}</p>`;
+                } finally {
+                    summarizeButton.disabled = false; // Re-enable button
+                }
+            }
+
+
+            // --- News Card Creation ---
+            /**
+             * Creates a news card element.
+             * @param {Object} article - The article data.
+             * @param {number} index - The index of the article (for layout and animation delay).
+             * @param {boolean} isBookmarkOrHistory - True if rendering for bookmarks/history page (no bookmark button, different styling for 'read more').
+             * @returns {HTMLElement} The created news card element.
+             */
+            function createNewsCard(article, index, isBookmarkOrHistory = false) {
+                const newsCard = document.createElement('div');
+                let cardClasses = `news-card p-6 flex flex-col justify-between bg-white dark:bg-gray-800 shadow-md dark:shadow-lg`;
+                
+                // Apply different layout based on index and current page for main view
+                if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
+                    cardClasses += ` w-full md:w-full lg:w-full large-card`;
+                } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
+                    cardClasses += ` w-full md:w-1/2 lg:w-1/2 medium-card`;
+                } else {
+                    cardClasses += ` w-full md:w-1/2 lg:w-1/3`;
+                }
+                newsCard.className = cardClasses;
+                newsCard.style.setProperty('--animation-delay', `${index * 0.05}s`); // Staggered animation delay
+
+                let imageHtml = '';
+                let placeholderSize = '600x400'; // Default placeholder size
+
+                if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
+                    placeholderSize = '800x450';
+                } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
+                    placeholderSize = '700x400';
+                }
+
+                if (article.image_url) {
+                    imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" loading="lazy"
+                                 onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
+                } else {
+                    imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
+                }
+
+                const isBookmarked = bookmarkedArticles.some(a => a.url === article.url);
+                const bookmarkIconClass = isBookmarked ? 'fas fa-bookmark text-blue-500' : 'far fa-bookmark text-gray-500';
+
+                newsCard.innerHTML = `
+                    ${imageHtml}
+                    <div>
+                        <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
+                        <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
+                        <div class="summary-area">
+                            <button class="summarize-button px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition duration-150 ease-in-out mt-2">
+                                Суммировать с AI
+                            </button>
+                            <div class="summary-content hidden text-sm"></div>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Автор: ${article.author || 'Неизвестно'}</p>
+                    </div>
+                    <div class="flex items-center justify-between mt-4">
+                        <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
+                           class="read-more-link inline-block font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                            Читать далее &rarr;
+                        </a>
+                        <div class="flex space-x-2">
+                            ${!isBookmarkOrHistory ? `
+                                <button class="bookmark-button p-2 rounded-full transition duration-150 ease-in-out hover:bg-gray-200 dark:hover:bg-gray-700" data-url="${article.url}">
+                                    <i class="${bookmarkIconClass}"></i>
+                                </button>
+                            ` : ''}
+                            <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
+                                <i class="fab fa-twitter"></i>
+                            </button>
+                            <button class="share-button facebook text-blue-700 hover:bg-blue-700 hover:text-white" data-platform="facebook" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
+                                <i class="fab fa-facebook-f"></i>
+                            </button>
+                            <button class="share-button whatsapp text-green-500 hover:bg-green-500 hover:text-white" data-platform="whatsapp" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
+                                <i class="fab fa-whatsapp"></i>
+                            </button>
+                            <button class="share-button viber text-purple-500 hover:bg-purple-500 hover:text-white" data-platform="viber" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
+                                <i class="fab fa-viber"></i>
+                            </button>
+                            <button class="share-button copy text-gray-500 hover:bg-gray-500 hover:text-white" data-platform="copy" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                // Add event listeners for share buttons
+                newsCard.querySelectorAll('.share-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const platform = button.dataset.platform;
+                        const url = button.dataset.url; // Original article URL
+                        const title = button.dataset.title;
+                        const sourceId = button.dataset.sourceId; // Source ID
+                        shareArticle(platform, url, title, sourceId);
+                    });
+                });
+
+                // Add event listener for bookmark button
+                if (!isBookmarkOrHistory) {
+                    const bookmarkButton = newsCard.querySelector('.bookmark-button');
+                    if (bookmarkButton) {
+                        bookmarkButton.addEventListener('click', () => {
+                            toggleBookmark(article);
+                            // Update icon immediately
+                            const icon = bookmarkButton.querySelector('i');
+                            if (bookmarkedArticles.some(a => a.url === article.url)) {
+                                icon.classList.remove('far', 'text-gray-500');
+                                icon.classList.add('fas', 'text-blue-500');
+                            } else {
+                                icon.classList.remove('fas', 'text-blue-500');
+                                icon.classList.add('far', 'text-gray-500');
+                            }
+                        });
+                    }
+                }
+
+                // Add event listener for "Read More" link to track history
+                const readMoreLink = newsCard.querySelector('.read-more-link');
+                if (readMoreLink) {
+                    readMoreLink.addEventListener('click', () => {
+                        addArticleToHistory(article);
+                    });
+                }
+
+                // Add event listener for Summarize button
+                const summarizeButton = newsCard.querySelector('.summarize-button');
+                const summaryContentDiv = newsCard.querySelector('.summary-content');
+                if (summarizeButton && summaryContentDiv) {
+                    summarizeButton.addEventListener('click', () => {
+                        // Use snippet for summarization, as full content might not be available
+                        const textToSummarize = article.snippet || article.title || '';
+                        if (textToSummarize) {
+                            fetchAISummary(textToSummarize, summaryContentDiv, summarizeButton);
+                        } else {
+                            summaryContentDiv.innerHTML = '<p class="text-red-500 dark:text-red-300">Нет текста для суммаризации.</p>';
+                            summaryContentDiv.classList.remove('hidden');
+                        }
+                    });
+                }
+
+                return newsCard;
+            }
+
+            // --- Fetching and Displaying News ---
+            /**
+             * Fetches news articles from the backend API and displays them.
+             * @param {boolean} reset - If true, clears existing news and resets page to 1.
+             */
+            async function fetchAndDisplayNews(reset = true) {
+                if (reset) {
+                    currentPage = 1;
+                    newsContainer.innerHTML = '';
+                    newsContainer.classList.add('hidden');
+                    loadMoreButton.classList.add('hidden');
+                }
+
+                loadingIndicator.classList.remove('hidden');
+                errorMessage.classList.add('hidden');
+                errorText.textContent = '';
+
+                try {
+                    const urlParams = new URLSearchParams();
+                    if (currentQuery) {
+                        urlParams.append('query', currentQuery);
+                    }
+                    if (currentCategory) {
+                        urlParams.append('category', currentCategory);
+                    }
+                    if (currentAuthor) {
+                        urlParams.append('author', currentAuthor);
+                    }
+                    urlParams.append('language', currentLanguage);
+                    urlParams.append('page', currentPage);
+                    
+                    if (fromDateInput.value) {
+                        urlParams.append('from_date', fromDateInput.value);
+                    }
+                    if (toDateInput.value) {
+                        urlParams.append('to_date', toDateInput.value);
+                    }
+                    if (selectedSourceIds.length > 0) {
+                        urlParams.append('sources', selectedSourceIds.join(','));
+                    }
+
+                    // Save current filters to localStorage
+                    localStorage.setItem('savedFilters', JSON.stringify({
+                        query: currentQuery,
+                        category: currentCategory,
+                        author: currentAuthor,
+                        language: currentLanguage,
+                        fromDate: fromDateInput.value,
+                        toDate: toDateInput.value,
+                        selectedSourceIds: selectedSourceIds
+                    }));
+
+                    const url = `${BACKEND_API_URL}/news?${urlParams.toString()}`;
+                    console.log(`Fetching news from: ${url}`);
+
+                    const response = await fetch(url);
+
+                    if (!response.ok) {
+                        const errorJson = await response.json();
+                        const apiError = errorJson.error || `HTTP error! Status: ${response.status}`;
+                        throw new Error(apiError);
+                    }
+
+                    const data = await response.json();
+                    const articles = data.articles;
+                    totalResults = data.totalResults; // Corrected to use data.totalResults directly
+
+                    if (articles && articles.length > 0) {
+                        articles.forEach((article, index) => {
+                            const newsCard = createNewsCard(article, index);
+                            newsContainer.appendChild(newsCard);
+                        });
+                        newsContainer.classList.remove('hidden');
+
+                        if (newsContainer.children.length < totalResults) {
+                            loadMoreButton.classList.remove('hidden');
+                        } else {
+                            loadMoreButton.classList.add('hidden');
+                        }
+
+                    } else if (reset) {
+                        errorMessage.classList.remove('hidden');
+                        errorText.textContent = `По вашему запросу или выбранным фильтрам новости не найдены. Попробуйте изменить критерии поиска или фильтрации.`;
+                        loadMoreButton.classList.add('hidden');
                     } else {
                         loadMoreButton.classList.add('hidden');
                     }
-
-                } else if (reset) {
+                } catch (error) {
+                    console.error("Error fetching news:", error);
                     errorMessage.classList.remove('hidden');
-                    errorText.textContent = `По вашему запросу или выбранным фильтрам новости не найдены. Попробуйте изменить критерии поиска или фильтрации.`;
+                    errorText.textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
                     loadMoreButton.classList.add('hidden');
-                } else {
-                    loadMoreButton.classList.add('hidden');
+                } finally {
+                    loadingIndicator.classList.add('hidden');
                 }
-            } catch (error) {
-                console.error("Error fetching news:", error);
-                errorMessage.classList.remove('hidden');
-                errorText.textContent = `Произошла ошибка при загрузке новостей: ${error.message}. Пожалуйста, попробуйте еще раз.`;
-                loadMoreButton.classList.add('hidden');
-            } finally {
-                loadingIndicator.classList.add('hidden');
-            }
-        }
-
-        // --- Source Selection Modal ---
-        /**
-         * Fetches all available sources from the backend.
-         */
-        async function fetchSources() {
-            try {
-                const response = await fetch(`${BACKEND_API_URL}/sources`);
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
-                }
-                allSources = await response.json();
-                displaySourcesInModal();
-            } catch (error) {
-                console.error("Error fetching sources:", error);
-                sourcesListContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Не удалось загрузить источники: ${error.message}</p>`;
-            }
-        }
-
-        /**
-         * Displays sources as checkboxes in the modal.
-         */
-        function displaySourcesInModal() {
-            sourcesListContainer.innerHTML = ''; // Clear previous content
-            if (allSources.length === 0) {
-                sourcesListContainer.innerHTML = `<p class="text-gray-600 dark:text-gray-300">Источники не найдены.</p>`;
-                return;
             }
 
-            allSources.forEach(source => {
-                const isChecked = selectedSourceIds.includes(source.id);
-                const label = document.createElement('label');
-                label.className = 'flex items-center mb-2 cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700';
-                label.innerHTML = `
-                    <input type="checkbox" value="${source.id}" ${isChecked ? 'checked' : ''} class="mr-3 h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
-                    <span class="text-gray-900 dark:text-gray-100 font-medium">${source.name}</span>
-                    <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">- ${source.description || 'Нет описания.'}</span>
-                `;
-                sourcesListContainer.appendChild(label);
-            });
-        }
-
-        /**
-         * Shows the sources modal.
-         */
-        function showSourcesModal() {
-            sourcesModal.classList.add('show');
-            // Re-render sources in case selection changed
-            displaySourcesInModal(); 
-        }
-
-        /**
-         * Hides the sources modal.
-         */
-        function hideSourcesModal() {
-            sourcesModal.classList.remove('show');
-        }
-
-        /**
-         * Handles applying selected sources.
-         */
-        function applySelectedSources() {
-            selectedSourceIds = [];
-            const checkboxes = sourcesListContainer.querySelectorAll('input[type="checkbox"]:checked');
-            checkboxes.forEach(checkbox => {
-                selectedSourceIds.push(checkbox.value);
-            });
-            localStorage.setItem('selectedSourceIds', JSON.stringify(selectedSourceIds)); // Save selected sources
-            hideSourcesModal();
-            // Clear other filters when sources are applied
-            currentQuery = '';
-            searchInput.value = '';
-            currentAuthor = '';
-            authorSearchInput.value = '';
-            currentCategory = '';
-            fromDateInput.value = '';
-            toDateInput.value = '';
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main'); // Re-fetch news with new sources
-        }
-
-        // --- UI Updates ---
-        // Function to update active category button styling
-        function updateActiveCategoryButton(selectedCategory) {
-            const buttons = categoryButtonsContainer.querySelectorAll('.category-button');
-            const isDark = htmlElement.classList.contains('dark');
-
-            buttons.forEach(button => {
-                button.classList.remove('active', 'bg-blue-500', 'bg-blue-600', 'bg-gray-600', 'bg-gray-800');
-                
-                if (button.dataset.category === selectedCategory) {
-                    button.classList.add('active');
-                    if (isDark) {
-                        button.classList.add('bg-gray-800', 'text-gray-100');
-                    } else {
-                        button.classList.add('bg-blue-600', 'text-white');
+            // --- Source Selection Modal ---
+            /**
+             * Fetches all available sources from the backend.
+             */
+            async function fetchSources() {
+                try {
+                    const response = await fetch(`${BACKEND_API_URL}/sources`);
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
                     }
-                } else {
-                    if (isDark) {
-                        button.classList.add('bg-gray-600', 'text-gray-100');
-                    } else {
-                        button.classList.add('bg-blue-500', 'text-white');
-                    }
+                    allSources = await response.json();
+                    displaySourcesInModal();
+                } catch (error) {
+                    console.error("Error fetching sources:", error);
+                    sourcesListContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Не удалось загрузить источники: ${error.message}</p>`;
                 }
-            });
-        }
-
-        // Function to update active navigation button styling
-        let currentPageView = 'main'; // Default view
-        function updateActiveNavButton(activeView) {
-            navButtons.forEach(button => {
-                button.classList.remove('active');
-                if (button.dataset.view === activeView) {
-                    button.classList.add('active');
-                }
-            });
-        }
-
-        // --- Page Rendering Logic ---
-        /**
-         * Renders the specified page view.
-         * @param {string} view - 'main', 'bookmarks', or 'history'.
-         */
-        function renderPage(view) {
-            mainPageView.classList.add('hidden');
-            bookmarksPageView.classList.add('hidden');
-            historyPageView.classList.add('hidden');
-
-            switch (view) {
-                case 'main':
-                    mainPageView.classList.remove('hidden');
-                    fetchAndDisplayNews(true); // Reload main news when returning
-                    break;
-                case 'bookmarks':
-                    bookmarksPageView.classList.remove('hidden');
-                    renderBookmarksPage();
-                    break;
-                case 'history':
-                    historyPageView.classList.remove('hidden');
-                    renderHistoryPage();
-                    break;
             }
-            currentPageView = view;
-            updateActiveNavButton(view);
-        }
 
-        /**
-         * Renders the bookmarked articles page.
-         */
-        function renderBookmarksPage() {
-            bookmarksContainer.innerHTML = '';
-            if (bookmarkedArticles.length === 0) {
-                noBookmarksMessage.classList.remove('hidden');
-            } else {
-                noBookmarksMessage.classList.add('hidden');
-                bookmarkedArticles.forEach((article, index) => {
-                    // Pass isBookmarkOrHistory = true to hide bookmark button
-                    const newsCard = createNewsCard(article, index, true); 
-                    bookmarksContainer.appendChild(newsCard);
+            /**
+             * Displays sources as checkboxes in the modal.
+             */
+            function displaySourcesInModal() {
+                sourcesListContainer.innerHTML = ''; // Clear previous content
+                if (allSources.length === 0) {
+                    sourcesListContainer.innerHTML = `<p class="text-gray-600 dark:text-gray-300">Источники не найдены.</p>`;
+                    return;
+                }
+
+                allSources.forEach(source => {
+                    const isChecked = selectedSourceIds.includes(source.id);
+                    const label = document.createElement('label');
+                    label.className = 'flex items-center mb-2 cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700';
+                    label.innerHTML = `
+                        <input type="checkbox" value="${source.id}" ${isChecked ? 'checked' : ''} class="mr-3 h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                        <span class="text-gray-900 dark:text-gray-100 font-medium">${source.name}</span>
+                        <span class="text-gray-500 dark:text-gray-400 text-sm ml-2">- ${source.description || 'Нет описания.'}</span>
+                    `;
+                    sourcesListContainer.appendChild(label);
                 });
             }
-        }
 
-        /**
-         * Renders the history articles page.
-         */
-        function renderHistoryPage() {
-            historyContainer.innerHTML = '';
-            if (viewedArticlesHistory.length === 0) {
-                noHistoryMessage.classList.remove('hidden');
-            } else {
-                noHistoryMessage.classList.add('hidden');
-                viewedArticlesHistory.forEach((article, index) => {
-                    // Pass isBookmarkOrHistory = true to hide bookmark button
-                    const newsCard = createNewsCard(article, index, true); 
-                    historyContainer.appendChild(newsCard);
+            /**
+             * Shows the sources modal.
+             */
+            function showSourcesModal() {
+                sourcesModal.classList.add('show');
+                // Re-render sources in case selection changed
+                displaySourcesInModal(); 
+            }
+
+            /**
+             * Hides the sources modal.
+             */
+            function hideSourcesModal() {
+                sourcesModal.classList.remove('show');
+            }
+
+            /**
+             * Handles applying selected sources.
+             */
+            function applySelectedSources() {
+                selectedSourceIds = [];
+                const checkboxes = sourcesListContainer.querySelectorAll('input[type="checkbox"]:checked');
+                checkboxes.forEach(checkbox => {
+                    selectedSourceIds.push(checkbox.value);
+                });
+                localStorage.setItem('selectedSourceIds', JSON.stringify(selectedSourceIds)); // Save selected sources
+                hideSourcesModal();
+                // Clear other filters when sources are applied
+                currentQuery = '';
+                searchInput.value = '';
+                currentAuthor = '';
+                authorSearchInput.value = '';
+                currentCategory = '';
+                fromDateInput.value = '';
+                toDateInput.value = '';
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main'); // Re-fetch news with new sources
+            }
+
+            // --- UI Updates ---
+            // Function to update active category button styling
+            function updateActiveCategoryButton(selectedCategory) {
+                const buttons = categoryButtonsContainer.querySelectorAll('.category-button');
+                const isDark = htmlElement.classList.contains('dark');
+
+                buttons.forEach(button => {
+                    button.classList.remove('active', 'bg-blue-500', 'bg-blue-600', 'bg-gray-600', 'bg-gray-800');
+                    
+                    if (button.dataset.category === selectedCategory) {
+                        button.classList.add('active');
+                        if (isDark) {
+                            button.classList.add('bg-gray-800', 'text-gray-100');
+                        } else {
+                            button.classList.add('bg-blue-600', 'text-white');
+                        }
+                    } else {
+                        if (isDark) {
+                            button.classList.add('bg-gray-600', 'text-gray-100');
+                        } else {
+                            button.classList.add('bg-blue-500', 'text-white');
+                        }
+                    }
                 });
             }
-        }
 
-        // --- Event Listeners ---
-        searchButton.addEventListener('click', () => {
-            currentQuery = searchInput.value.trim();
-            currentCategory = '';
-            currentAuthor = '';
-            authorSearchInput.value = '';
-            fromDateInput.value = ''; // Clear date filters
-            toDateInput.value = '';   // Clear date filters
-            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main'); // Ensure we are on the main news page
-        });
-
-        searchInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                searchButton.click();
+            // Function to update active navigation button styling
+            let currentPageView = 'main'; // Default view
+            function updateActiveNavButton(activeView) {
+                navButtons.forEach(button => {
+                    button.classList.remove('active');
+                    if (button.dataset.view === activeView) {
+                        button.classList.add('active');
+                    }
+                });
             }
-        });
 
-        authorSearchButton.addEventListener('click', () => {
-            currentAuthor = authorSearchInput.value.trim();
-            currentQuery = '';
-            searchInput.value = '';
-            currentCategory = '';
-            fromDateInput.value = '';
-            toDateInput.value = '';
-            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main'); // Ensure we are on the main news page
-        });
+            // --- Page Rendering Logic ---
+            /**
+             * Renders the specified page view.
+             * @param {string} view - 'main', 'bookmarks', or 'history'.
+             */
+            function renderPage(view) {
+                mainPageView.classList.add('hidden');
+                bookmarksPageView.classList.add('hidden');
+                historyPageView.classList.add('hidden');
 
-        authorSearchInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                authorSearchButton.click();
+                switch (view) {
+                    case 'main':
+                        mainPageView.classList.remove('hidden');
+                        fetchAndDisplayNews(true); // Reload main news when returning
+                        break;
+                    case 'bookmarks':
+                        bookmarksPageView.classList.remove('hidden');
+                        renderBookmarksPage();
+                        break;
+                    case 'history':
+                        historyPageView.classList.remove('hidden');
+                        renderHistoryPage();
+                        break;
+                }
+                currentPageView = view;
+                updateActiveNavButton(view);
             }
-        });
 
-        // Date filter change listeners
-        fromDateInput.addEventListener('change', () => {
-            currentQuery = searchInput.value.trim();
-            currentCategory = '';
-            currentAuthor = '';
-            authorSearchInput.value = '';
-            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main');
-        });
+            /**
+             * Renders the bookmarked articles page.
+             */
+            function renderBookmarksPage() {
+                bookmarksContainer.innerHTML = '';
+                if (bookmarkedArticles.length === 0) {
+                    noBookmarksMessage.classList.remove('hidden');
+                } else {
+                    noBookmarksMessage.classList.add('hidden');
+                    bookmarkedArticles.forEach((article, index) => {
+                        // Pass isBookmarkOrHistory = true to hide bookmark button
+                        const newsCard = createNewsCard(article, index, true); 
+                        bookmarksContainer.appendChild(newsCard);
+                    });
+                }
+            }
 
-        toDateInput.addEventListener('change', () => {
-            currentQuery = searchInput.value.trim();
-            currentCategory = '';
-            currentAuthor = '';
-            authorSearchInput.value = '';
-            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main');
-        });
+            /**
+             * Renders the history articles page.
+             */
+            function renderHistoryPage() {
+                historyContainer.innerHTML = '';
+                if (viewedArticlesHistory.length === 0) {
+                    noHistoryMessage.classList.remove('hidden');
+                } else {
+                    noHistoryMessage.classList.add('hidden');
+                    viewedArticlesHistory.forEach((article, index) => {
+                        // Pass isBookmarkOrHistory = true to hide bookmark button
+                        const newsCard = createNewsCard(article, index, true); 
+                        historyContainer.appendChild(newsCard);
+                    });
+                }
+            }
 
-        // Quick date filter buttons
-        dateQuickButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const days = parseInt(button.dataset.days);
-                const today = new Date();
-                const fromDate = new Date();
-                fromDate.setDate(today.getDate() - days);
+            // --- Event Listeners ---
+            searchButton.addEventListener('click', () => {
+                currentQuery = searchInput.value.trim();
+                currentCategory = '';
+                currentAuthor = '';
+                authorSearchInput.value = '';
+                fromDateInput.value = ''; // Clear date filters
+                toDateInput.value = '';   // Clear date filters
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main'); // Ensure we are on the main news page
+            });
 
-                fromDateInput.value = fromDate.toISOString().split('T')[0];
-                toDateInput.value = today.toISOString().split('T')[0];
+            searchInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    searchButton.click();
+                }
+            });
 
-                // Trigger search with new dates
+            authorSearchButton.addEventListener('click', () => {
+                currentAuthor = authorSearchInput.value.trim();
+                currentQuery = '';
+                searchInput.value = '';
+                currentCategory = '';
+                fromDateInput.value = '';
+                toDateInput.value = '';
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Use saved sources
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main'); // Ensure we are on the main news page
+            });
+
+            authorSearchInput.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    authorSearchButton.click();
+                }
+            });
+
+            // Date filter change listeners
+            fromDateInput.addEventListener('change', () => {
                 currentQuery = searchInput.value.trim();
                 currentCategory = '';
                 currentAuthor = '';
@@ -1069,111 +1221,142 @@
                 updateActiveCategoryButton(currentCategory);
                 renderPage('main');
             });
-        });
 
-        // Language select event listener
-        languageSelect.addEventListener('change', () => {
-            currentLanguage = languageSelect.value;
-            localStorage.setItem('selectedLanguage', currentLanguage); // Save selected language
-            // Clear other filters when language is changed
-            currentQuery = '';
-            searchInput.value = '';
-            currentAuthor = '';
-            authorSearchInput.value = '';
-            currentCategory = '';
-            fromDateInput.value = '';
-            toDateInput.value = '';
-            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main'); // Re-fetch news with new language
-        });
+            toDateInput.addEventListener('change', () => {
+                currentQuery = searchInput.value.trim();
+                currentCategory = '';
+                currentAuthor = '';
+                authorSearchInput.value = '';
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main');
+            });
 
-        categoryButtonsContainer.addEventListener('click', (event) => {
-            if (event.target.closest('.category-button')) {
-                const button = event.target.closest('.category-button');
-                currentCategory = button.dataset.category;
+            // Quick date filter buttons
+            dateQuickButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const days = parseInt(button.dataset.days);
+                    const today = new Date();
+                    const fromDate = new Date();
+                    fromDate.setDate(today.getDate() - days);
+
+                    fromDateInput.value = fromDate.toISOString().split('T')[0];
+                    toDateInput.value = today.toISOString().split('T')[0];
+
+                    // Trigger search with new dates
+                    currentQuery = searchInput.value.trim();
+                    currentCategory = '';
+                    currentAuthor = '';
+                    authorSearchInput.value = '';
+                    selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+                    updateActiveCategoryButton(currentCategory);
+                    renderPage('main');
+                });
+            });
+
+            // Language select event listener
+            languageSelect.addEventListener('change', () => {
+                currentLanguage = languageSelect.value;
+                localStorage.setItem('selectedLanguage', currentLanguage); // Save selected language
+                // Clear other filters when language is changed
                 currentQuery = '';
                 searchInput.value = '';
                 currentAuthor = '';
                 authorSearchInput.value = '';
+                currentCategory = '';
                 fromDateInput.value = '';
                 toDateInput.value = '';
                 selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
                 updateActiveCategoryButton(currentCategory);
-                renderPage('main');
-            }
-        });
-
-        loadMoreButton.addEventListener('click', () => {
-            currentPage++;
-            fetchAndDisplayNews(false);
-        });
-
-        themeToggle.addEventListener('click', toggleTheme);
-
-        // Source selection event listeners
-        selectSourcesButton.addEventListener('click', showSourcesModal);
-        closeModalButton.addEventListener('click', hideSourcesModal);
-        sourcesModal.addEventListener('click', (event) => {
-            if (event.target === sourcesModal) {
-                hideSourcesModal();
-            }
-        });
-        applySourcesButton.addEventListener('click', applySelectedSources);
-
-        // Navigation button event listeners
-        navButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                renderPage(button.dataset.view);
+                renderPage('main'); // Re-fetch news with new language
             });
-        });
 
-        // --- Initial Load and Saved Filters ---
-        window.onload = () => {
-            applySavedTheme();
-            // Set initial language select value based on localStorage or default
-            languageSelect.value = currentLanguage; 
-            fetchSources(); // Fetch sources when page loads
+            categoryButtonsContainer.addEventListener('click', (event) => {
+                if (event.target.closest('.category-button')) {
+                    const button = event.target.closest('.category-button');
+                    currentCategory = button.dataset.category;
+                    currentQuery = '';
+                    searchInput.value = '';
+                    currentAuthor = '';
+                    authorSearchInput.value = '';
+                    fromDateInput.value = '';
+                    toDateInput.value = '';
+                    selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
+                    updateActiveCategoryButton(currentCategory);
+                    renderPage('main');
+                }
+            });
 
-            // Load saved filters on startup
-            const savedFilters = JSON.parse(localStorage.getItem('savedFilters'));
-            if (savedFilters) {
-                searchInput.value = savedFilters.query || '';
-                currentQuery = savedFilters.query || '';
-                authorSearchInput.value = savedFilters.author || '';
-                currentAuthor = savedFilters.author || '';
-                fromDateInput.value = savedFilters.fromDate || '';
-                toDateInput.value = savedFilters.toDate || '';
-                currentCategory = savedFilters.category || '';
-                selectedSourceIds = savedFilters.selectedSourceIds || [];
-                languageSelect.value = savedFilters.language || 'ru';
-                currentLanguage = savedFilters.language || 'ru';
-            }
+            loadMoreButton.addEventListener('click', () => {
+                currentPage++;
+                fetchAndDisplayNews(false);
+            });
 
-            // Check for URL parameters for direct article linking
-            const urlParams = new URLSearchParams(window.location.search);
-            const queryParam = urlParams.get('q');
-            const sourceParam = urlParams.get('s');
+            themeToggle.addEventListener('click', toggleTheme);
 
-            if (queryParam || sourceParam) {
-                // If parameters are present, use them for initial search
-                currentQuery = queryParam || '';
-                searchInput.value = queryParam || '';
-                selectedSourceIds = sourceParam ? [sourceParam] : [];
-                // Clear other filters to focus on the shared article's context
-                currentCategory = '';
-                currentAuthor = '';
-                authorSearchInput.value = '';
-                fromDateInput.value = '';
-                toDateInput.value = '';
-                
-                // Remove parameters from URL to keep it clean after initial load
-                // history.replaceState({}, document.title, window.location.pathname);
-            }
+            // Source selection event listeners
+            selectSourcesButton.addEventListener('click', showSourcesModal);
+            closeModalButton.addEventListener('click', hideSourcesModal);
+            sourcesModal.addEventListener('click', (event) => {
+                if (event.target === sourcesModal) {
+                    hideSourcesModal();
+                }
+            });
+            applySourcesButton.addEventListener('click', applySelectedSources);
 
-            updateActiveCategoryButton(currentCategory);
-            renderPage('main'); // Start on the main news page
-        };
-    </script>
-</body>
-</html>
+            // Navigation button event listeners
+            navButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    renderPage(button.dataset.view);
+                });
+            });
+
+            // --- Initial Load and Saved Filters ---
+            window.onload = () => {
+                applySavedTheme();
+                // Set initial language select value based on localStorage or default
+                languageSelect.value = currentLanguage; 
+                fetchSources(); // Fetch sources when page loads
+
+                // Load saved filters on startup
+                const savedFilters = JSON.parse(localStorage.getItem('savedFilters'));
+                if (savedFilters) {
+                    searchInput.value = savedFilters.query || '';
+                    currentQuery = savedFilters.query || '';
+                    authorSearchInput.value = savedFilters.author || '';
+                    currentAuthor = savedFilters.author || '';
+                    fromDateInput.value = savedFilters.fromDate || '';
+                    toDateInput.value = savedFilters.toDate || '';
+                    currentCategory = savedFilters.category || '';
+                    selectedSourceIds = savedFilters.selectedSourceIds || [];
+                    languageSelect.value = savedFilters.language || 'ru';
+                    currentLanguage = savedFilters.language || 'ru';
+                }
+
+                // Check for URL parameters for direct article linking
+                const urlParams = new URLSearchParams(window.location.search);
+                const queryParam = urlParams.get('q');
+                const sourceParam = urlParams.get('s');
+
+                if (queryParam || sourceParam) {
+                    // If parameters are present, use them for initial search
+                    currentQuery = queryParam || '';
+                    searchInput.value = queryParam || '';
+                    selectedSourceIds = sourceParam ? [sourceParam] : [];
+                    // Clear other filters to focus on the shared article's context
+                    currentCategory = '';
+                    currentAuthor = '';
+                    authorSearchInput.value = '';
+                    fromDateInput.value = '';
+                    toDateInput.value = '';
+                    
+                    // Remove parameters from URL to keep it clean after initial load
+                    // history.replaceState({}, document.title, window.location.pathname);
+                }
+
+                updateActiveCategoryButton(currentCategory);
+                renderPage('main'); // Start on the main news page
+            };
+        </script>
+    </body>
+    </html>
