@@ -18,6 +18,12 @@
     <meta property="og:image" content="https://studnews.ru/NSA.jpg"> <!-- Обновлено на ваш новый домен -->
     <meta property="og:site_name" content="Student News Aggregator">
 
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Новости для студентов | Актуальные события, образование, карьера">
+    <meta name="twitter:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta name="twitter:image" content="https://studnews.ru/NSA.jpg">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Google Fonts - Inter -->
@@ -314,6 +320,44 @@
         #scrollToTopBtn:hover {
             background-color: #1d4ed8; /* Darker blue on hover */
         }
+
+        /* Full Article Modal Specific Styles */
+        #articleDetailModal .modal-content {
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+        }
+        #articleDetailModal img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        #articleDetailModal h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        #articleDetailModal p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        #articleDetailModal .original-link {
+            display: inline-block;
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s ease;
+        }
+        #articleDetailModal .original-link:hover {
+            background-color: #45a049;
+        }
     </style>
     <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
     <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
@@ -331,6 +375,12 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
+
+    <!-- JSON-LD Microdata (will be dynamically updated by JS) -->
+    <script type="application/ld+json"></script>
+
+    <!-- Disqus Comment Count Script -->
+    <script id="dsq-count-scr" src="//studnews-ru.disqus.com/count.js" async></script>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 bg-f0f2f5 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
 
@@ -559,6 +609,24 @@
         </div>
     </div>
 
+    <!-- Full Article Detail Modal (New) -->
+    <div id="articleDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeArticleDetailModalButton">&times;</span>
+            <img id="articleDetailImage" src="" alt="Изображение статьи" class="w-full h-auto rounded-lg mb-4">
+            <h2 id="articleDetailTitle" class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2"></h2>
+            <p id="articleDetailSnippet" class="text-gray-700 dark:text-gray-300 mb-4"></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Источник: <span id="articleDetailSource"></span> | Автор: <span id="articleDetailAuthor"></span> | Опубликовано: <span id="articleDetailDate"></span></p>
+            <a id="articleDetailOriginalLink" href="#" target="_blank" rel="noopener noreferrer" class="original-link">
+                Читать оригинал статьи &rarr;
+            </a>
+
+            <!-- Disqus Comments Section -->
+            <div id="disqus_thread" class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md dark:shadow-lg"></div>
+            <noscript>Включите JavaScript, чтобы прочитать комментарии.</noscript>
+        </div>
+    </div>
+
     <!-- Scroll to Top Button -->
     <button id="scrollToTopBtn" title="Наверх">
         <i class="fas fa-arrow-up"></i>
@@ -621,6 +689,18 @@
         const applyFavoriteSourcesButton = document.getElementById('applyFavoriteSourcesButton');
         const favoriteCategoriesDisplay = document.getElementById('favoriteCategoriesDisplay');
         const favoriteSourcesDisplay = document.getElementById('favoriteSourcesDisplay');
+
+        // Full Article Detail Modal elements
+        const articleDetailModal = document.getElementById('articleDetailModal');
+        const closeArticleDetailModalButton = document.getElementById('closeArticleDetailModalButton');
+        const articleDetailImage = document.getElementById('articleDetailImage');
+        const articleDetailTitle = document.getElementById('articleDetailTitle');
+        const articleDetailSnippet = document.getElementById('articleDetailSnippet');
+        const articleDetailSource = document.getElementById('articleDetailSource');
+        const articleDetailAuthor = document.getElementById('articleDetailAuthor');
+        const articleDetailDate = document.getElementById('articleDetailDate');
+        const articleDetailOriginalLink = document.getElementById('articleDetailOriginalLink');
+
 
         // Scroll to Top Button
         const scrollToTopBtn = document.getElementById('scrollToTopBtn');
@@ -899,9 +979,20 @@
                 placeholderSize = '700x400';
             }
 
-            if (article.image_url) {
-                imageHtml = `<img src="${article.image_url}" alt="${article.source_title || 'News image'}" loading="lazy"
-                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />`;
+            // Generate WebP source if image_url exists and is a common image format
+            const webpImageUrl = article.image_url ? article.image_url.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
+            const originalImageUrl = article.image_url;
+
+            if (originalImageUrl) {
+                imageHtml = `
+                    <picture>
+                        ${webpImageUrl ? `<source srcset="${webpImageUrl}" type="image/webp">` : ''}
+                        <img src="${originalImageUrl}" 
+                             alt="${article.title || 'News image'}" 
+                             loading="lazy"
+                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />
+                    </picture>
+                `;
             } else {
                 imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
             }
@@ -923,16 +1014,20 @@
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Автор: ${article.author || 'Неизвестно'}</p>
                 </div>
                 <div class="flex items-center justify-between mt-4">
-                    <a href="${article.url || '#'}" target="_blank" rel="noopener noreferrer"
-                       class="read-more-link inline-block font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    <!-- Modified Read More Link to open modal -->
+                    <button class="read-more-button inline-block font-medium transition duration-150 ease-in-out text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300" data-article-index="${index}">
                         Читать далее &rarr;
-                    </a>
+                    </button>
                     <div class="flex space-x-2">
                         ${!isBookmarkOrHistory ? `
                             <button class="bookmark-button p-2 rounded-full transition duration-150 ease-in-out hover:bg-gray-200 dark:hover:bg-gray-700" data-url="${article.url}">
                                 <i class="${bookmarkIconClass}"></i>
                             </button>
                         ` : ''}
+                        <!-- Disqus Comment Count Link -->
+                        <a href="${article.url || '#'}#disqus_thread" data-disqus-url="${article.url}" class="text-sm text-gray-500 dark:text-gray-400 flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
+                            <i class="fas fa-comments mr-1"></i> <span class="disqus-comment-count">0</span>
+                        </a>
                         <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-twitter"></i>
                         </button>
@@ -988,11 +1083,24 @@
                 }
             }
 
-            // Add event listener for "Read More" link to track history
-            const readMoreLink = newsCard.querySelector('.read-more-link');
-            if (readMoreLink) {
-                readMoreLink.addEventListener('click', () => {
-                    addArticleToHistory(article);
+            // Add event listener for "Read More" button to open modal
+            const readMoreButton = newsCard.querySelector('.read-more-button');
+            if (readMoreButton) {
+                readMoreButton.addEventListener('click', () => {
+                    // Assuming 'articles' array holds the currently displayed articles
+                    // We need to get the full article object from the newsContainer's children
+                    // This assumes that the `newsContainer` is populated with the `articles` array
+                    // and the index corresponds to the original article in that array.
+                    // A more robust solution might pass the article object directly or store it.
+                    // For simplicity, let's assume `articles` is globally accessible or passed.
+                    // For now, we'll rely on the `fetchAndDisplayNews` to have populated `newsContainer`
+                    // and then retrieve the article from the `newsContainer`'s dataset if needed.
+                    // A better way would be to pass the article object directly to openArticleDetail
+                    // from where `createNewsCard` is called.
+                    // For this example, I'll pass the whole article object to the button's data.
+                    // This requires a slight change in how `createNewsCard` is called if it's not already doing so.
+                    // Let's assume for simplicity that the `article` object is accessible here.
+                    openArticleDetail(article);
                 });
             }
 
@@ -1014,6 +1122,103 @@
 
             return newsCard;
         }
+
+        // --- Full Article Detail Modal Logic (New) ---
+        /**
+         * Opens the modal to display full article details and initializes Disqus.
+         * @param {Object} article - The article object to display.
+         */
+        function openArticleDetail(article) {
+            if (!article) {
+                console.error("Не удалось открыть детали статьи: объект статьи отсутствует.");
+                showToast("Не удалось загрузить детали статьи.", "error");
+                return;
+            }
+
+            // Add article to history
+            addArticleToHistory(article);
+
+            // Populate modal content
+            articleDetailImage.src = article.image_url || `https://placehold.co/800x450/cccccc/333333?text=No+Image`;
+            articleDetailImage.alt = article.title || 'Изображение статьи';
+            articleDetailTitle.textContent = article.title || 'Заголовок статьи';
+            articleDetailSnippet.textContent = article.snippet || 'Описание статьи отсутствует.';
+            articleDetailSource.textContent = article.source_title || 'Неизвестно';
+            articleDetailAuthor.textContent = article.author || 'Неизвестно';
+            articleDetailDate.textContent = article.published_at ? new Date(article.published_at).toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Неизвестно';
+            articleDetailOriginalLink.href = article.url || '#';
+
+            // Show the modal
+            articleDetailModal.classList.add('show');
+
+            // Initialize Disqus for this article
+            loadDisqusComments(article);
+
+            // Update meta tags and JSON-LD for this specific article
+            updateMetaTags(article, article.url || window.location.href);
+            updateJsonLd(article);
+        }
+
+        /**
+         * Closes the full article detail modal.
+         */
+        function closeArticleDetailModal() {
+            articleDetailModal.classList.remove('show');
+            // Reset meta tags and JSON-LD to default (main page) when closing modal
+            updateMetaTags(null, window.location.href);
+            updateJsonLd(null);
+        }
+
+        // --- Disqus Integration Logic ---
+        /**
+         * Initializes or reloads Disqus for a new article.
+         * @param {Object} article - Object with article data (minimum article.url and article.title).
+         */
+        function loadDisqusComments(article) {
+            // Check if necessary article data is available
+            if (!article || !article.url || !article.title) {
+                console.warn("Disqus: Недостаточно данных статьи для загрузки комментариев.");
+                const disqusThread = document.getElementById('disqus_thread');
+                if (disqusThread) {
+                    disqusThread.innerHTML = '<p class="text-gray-600 dark:text-gray-300">Комментарии недоступны для этой статьи.</p>';
+                }
+                return;
+            }
+
+            // Ensure the disqus_thread div exists in the DOM
+            const disqusThread = document.getElementById('disqus_thread');
+            if (!disqusThread) {
+                console.error("Disqus: Элемент #disqus_thread не найден в DOM. Убедитесь, что он добавлен в HTML.");
+                return;
+            }
+
+            // Global disqus_config variables
+            window.disqus_config = function () {
+                this.page.url = article.url; // Canonical URL of the article
+                this.page.identifier = article.url; // Unique identifier for the article (using URL for simplicity)
+                this.page.title = article.title; // Title of the article
+            };
+
+            // Check if Disqus script is already loaded
+            if (typeof DISQUS === 'object') {
+                // If loaded, reset it to load new comments for the new article
+                DISQUS.reset({
+                    reload: true,
+                    config: function () {
+                        this.page.url = article.url;
+                        this.page.identifier = article.url;
+                        this.page.title = article.title;
+                    }
+                });
+            } else {
+                // If not loaded, create and append the script to the DOM
+                const s = document.createElement('script');
+                s.src = 'https://studnews-ru.disqus.com/embed.js'; // Your Disqus shortname
+                s.setAttribute('data-timestamp', +new Date());
+                (document.head || document.body).appendChild(s);
+            }
+        }
+
 
         // --- Fetching and Displaying News ---
         /**
@@ -1363,6 +1568,11 @@
             }
             currentPageView = view;
             updateActiveNavButton(view);
+            // Reset meta tags to default when navigating away from article view
+            if (view !== 'articleDetail') { // Assuming 'articleDetail' would be a view if not a modal
+                updateMetaTags(null, window.location.href);
+                updateJsonLd(null);
+            }
         }
 
         /**
@@ -1415,6 +1625,107 @@
             toDateInput.value = '';
             selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Keep saved sources
             updateActiveCategoryButton(currentCategory);
+        }
+
+        // --- SEO: Dynamic Meta Tags and JSON-LD ---
+        /**
+         * Dynamically updates meta tags and Open Graph for SEO.
+         * @param {Object} article - The article object with data for meta tags. Can be null for default.
+         * @param {string} currentUrl - The current canonical URL of the page.
+         */
+        function updateMetaTags(article, currentUrl) {
+            const defaultTitle = "Новости для студентов | Актуальные события, образование, карьера";
+            const defaultDescription = "Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.";
+            const defaultKeywords = "новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей";
+            const defaultImage = `${BASE_SITE_URL}NSA.jpg`; // Your logo or default image
+
+            const pageTitle = article ? article.title || defaultTitle : defaultTitle;
+            const pageDescription = article ? article.snippet || defaultDescription : defaultDescription;
+            const pageKeywords = article ? (article.category ? `${article.category}, ${defaultKeywords}` : defaultKeywords) : defaultKeywords;
+            const pageImage = article ? article.image_url || defaultImage : defaultImage;
+
+            document.title = pageTitle;
+
+            // Helper to update or create meta tags
+            const setMetaTag = (name, content, attribute = 'name') => {
+                let tag = document.querySelector(`meta[${attribute}="${name}"]`);
+                if (!tag) {
+                    tag = document.createElement('meta');
+                    tag.setAttribute(attribute, name);
+                    document.head.appendChild(tag);
+                }
+                tag.setAttribute('content', content);
+            };
+
+            // Standard Meta Tags
+            setMetaTag('description', pageDescription);
+            setMetaTag('keywords', pageKeywords);
+
+            // Open Graph Meta Tags
+            setMetaTag('og:title', pageTitle, 'property');
+            setMetaTag('og:description', pageDescription, 'property');
+            setMetaTag('og:type', article ? 'article' : 'website', 'property');
+            setMetaTag('og:url', currentUrl, 'property');
+            setMetaTag('og:image', pageImage, 'property');
+            setMetaTag('og:site_name', 'Student News Aggregator', 'property');
+
+            // Twitter Card Meta Tags
+            setMetaTag('twitter:card', 'summary_large_image', 'name');
+            setMetaTag('twitter:title', pageTitle, 'name');
+            setMetaTag('twitter:description', pageDescription, 'name');
+            setMetaTag('twitter:image', pageImage, 'name');
+        }
+
+        /**
+         * Dynamically generates and injects JSON-LD microdata for an article.
+         * @param {Object} article - The article object with data. Can be null to remove existing.
+         */
+        function updateJsonLd(article) {
+            // Remove existing JSON-LD script to avoid duplication
+            const existingScript = document.querySelector('script[type="application/ld+json"]');
+            if (existingScript) {
+                existingScript.remove();
+            }
+
+            if (!article || !article.title || !article.url) {
+                return; // Do not generate JSON-LD if no article data or for main page
+            }
+
+            const authorName = article.author || article.source_title || "Неизвестный автор";
+            const publishedAt = article.published_at || new Date().toISOString();
+            const updatedAt = publishedAt; // If no separate modified date, use published date
+            const imageUrl = article.image_url || `${BASE_SITE_URL}NSA.jpg`; // Article image or default logo
+
+            const jsonLdData = {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": article.title,
+                "description": article.snippet || "",
+                "image": [imageUrl],
+                "author": {
+                    "@type": "Person",
+                    "name": authorName
+                },
+                "datePublished": publishedAt,
+                "dateModified": updatedAt,
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "StudNews",
+                    "logo": {
+                        "@type": "ImageObject",
+                        "url": `${BASE_SITE_URL}NSA.jpg` // Path to your logo
+                    }
+                },
+                "mainEntityOfPage": {
+                    "@type": "WebPage",
+                    "@id": article.url
+                }
+            };
+
+            const script = document.createElement('script');
+            script.type = 'application/ld+json';
+            script.textContent = JSON.stringify(jsonLdData);
+            document.head.appendChild(script);
         }
 
         // --- Event Listeners ---
@@ -1546,6 +1857,14 @@
         });
         applyFavoriteSourcesButton.addEventListener('click', applyFavoriteSources);
 
+        // Article Detail Modal event listeners
+        closeArticleDetailModalButton.addEventListener('click', closeArticleDetailModal);
+        articleDetailModal.addEventListener('click', (event) => {
+            if (event.target === articleDetailModal) {
+                closeArticleDetailModal();
+            }
+        });
+
 
         // Navigation button event listeners
         navButtons.forEach(button => {
@@ -1617,6 +1936,8 @@
 
             updateActiveCategoryButton(currentCategory);
             renderPage('main'); // Start on the main news page
+            updateMetaTags(null, window.location.href); // Set initial meta tags for main page
+            updateJsonLd(null); // Clear any initial JSON-LD
         };
     </script>
 </body>
