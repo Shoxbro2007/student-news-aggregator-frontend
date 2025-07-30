@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /admin/ # Если у вас есть админ-панель
+Sitemap: https://studnews.ru/sitemap.xml
