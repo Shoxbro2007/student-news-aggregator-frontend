@@ -76,6 +76,8 @@
             border-top-left-radius: 0.75rem;
             border-top-right-radius: 0.75rem;
             margin-bottom: 1rem;
+            text-align: center; /* Ensure text is centered */
+            padding: 10px; /* Add some padding */
         }
         .dark .news-card .placeholder-image {
             background-color: #374151; /* Darker gray */
@@ -382,6 +384,25 @@
         }
         #articleDetailModal .original-link:hover {
             background-color: #45a049;
+        }
+        /* Placeholder for modal image */
+        #articleDetailImageContainer .placeholder-image {
+            width: 100%;
+            height: 250px; /* Fixed height for modal placeholder */
+            background-color: #e0e0e0; /* Light gray */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #616161; /* Darker gray text */
+            font-weight: 500;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            padding: 10px;
+        }
+        .dark #articleDetailImageContainer .placeholder-image {
+            background-color: #374151; /* Darker gray */
+            color: #a0aec0; /* Lighter gray text */
         }
     </style>
     <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
@@ -1008,13 +1029,13 @@
             newsCard.style.setProperty('--animation-delay', `${index * 0.05}s`); // Staggered animation delay
 
             let imageHtml = '';
-            let placeholderText = 'Нет изображения';
-            let placeholderSize = '600x400'; // Default placeholder size
+            const placeholderText = 'Нет изображения'; // Text for the placeholder
+            let placeholderHeight = '180px'; // Default height for standard cards
 
             if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
-                placeholderSize = '800x450';
+                placeholderHeight = '250px';
             } else if (!isBookmarkOrHistory && currentPage === 1 && (index === 1 || index === 2)) {
-                placeholderSize = '700x400';
+                placeholderHeight = '200px';
             }
 
             // Generate WebP source if image_url exists and is a common image format
@@ -1028,12 +1049,13 @@
                         <img src="${originalImageUrl}" 
                              alt="${article.title || 'News image'}" 
                              loading="lazy"
-                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=${encodeURIComponent(placeholderText)}';" />
+                             onerror="this.onerror=null; this.outerHTML='<div class=&quot;placeholder-image&quot; style=&quot;height: ${placeholderHeight};&quot;>${placeholderText}</div>'; console.log('Image failed to load, replaced with placeholder for:', '${article.title}');" />
                     </picture>
                 `;
             } else {
                 // Directly use a placeholder div if no image URL
-                imageHtml = `<div class="placeholder-image" style="height: ${placeholderSize.split('x')[1]}px;">${placeholderText}</div>`;
+                imageHtml = `<div class="placeholder-image" style="height: ${placeholderHeight};">${placeholderText}</div>`;
+                console.log('No image URL provided for article:', article.title);
             }
 
             const isBookmarked = bookmarkedArticles.some(a => a.url === article.url);
@@ -1171,6 +1193,7 @@
 
             // Create image or placeholder for the modal
             const modalPlaceholderText = 'Изображение недоступно';
+            const modalPlaceholderHeight = '250px'; // Consistent height for modal placeholder
             if (article.image_url) {
                 const imgElement = document.createElement('img');
                 imgElement.src = article.image_url;
@@ -1179,6 +1202,7 @@
                 imgElement.onerror = function() {
                     // Fallback to a div placeholder if image fails to load in modal
                     this.onerror = null; // Prevent infinite loop
+                    console.log('Modal image failed to load for:', article.title, 'URL:', article.image_url);
                     const placeholderDiv = document.createElement('div');
                     placeholderDiv.className = 'placeholder-image w-full h-64 rounded-lg mb-4'; // Fixed height for modal placeholder
                     placeholderDiv.textContent = modalPlaceholderText;
@@ -1187,6 +1211,7 @@
                 };
                 articleDetailImageContainer.appendChild(imgElement);
             } else {
+                console.log('No image URL provided for modal article:', article.title);
                 const placeholderDiv = document.createElement('div');
                 placeholderDiv.className = 'placeholder-image w-full h-64 rounded-lg mb-4'; // Fixed height for modal placeholder
                 placeholderDiv.textContent = modalPlaceholderText;
@@ -1995,6 +2020,7 @@
     </script>
 </body>
 </html>
+
 
 
 
