@@ -634,9 +634,12 @@
         let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru';
         let currentPage = 1;
         let totalResults = 0;
-        // Removed fetchSources() call and hardcoded allSources directly
+        
+        // Hardcoded list of popular sources for GNews API
+        // GNews API does not provide a /sources endpoint like NewsAPI did.
+        // These IDs should ideally match the 'name' field from GNews articles, converted to lowercase and hyphenated.
         let allSources = [
-            { id: 'lenta-ru', name: 'Lenta.ru', description: 'Российское интернет-издание' },
+            { id: 'lenta.ru', name: 'Lenta.ru', description: 'Российское интернет-издание' },
             { id: 'rt', name: 'RT', description: 'Российский международный новостной телеканал' },
             { id: 'ria-novosti', name: 'РИА Новости', description: 'Российское информационное агентство' },
             { id: 'bbc-news', name: 'BBC News', description: 'British Broadcasting Corporation' },
@@ -646,9 +649,9 @@
             { id: 'reuters', name: 'Reuters', description: 'International news agency' },
             { id: 'kommersant', name: 'Коммерсантъ', description: 'Российская ежедневная газета' },
             { id: 'izvestia', name: 'Известия', description: 'Российская общественно-политическая газета' },
-            { id: 'gazeta-ru', name: 'Газета.Ru', description: 'Российское интернет-издание' },
+            { id: 'gazeta.ru', name: 'Газета.Ru', description: 'Российское интернет-издание' },
             { id: 'rbc', name: 'РБК', description: 'Российский медиахолдинг' },
-            { id: 'vesti-ru', name: 'Вести.Ru', description: 'Российский новостной портал' },
+            { id: 'vesti.ru', name: 'Вести.Ru', description: 'Российский новостной портал' },
             { id: 'tass', name: 'ТАСС', description: 'Российское государственное информационное агентство' },
             { id: 'interfax', name: 'Интерфакс', description: 'Российское информационное агентство' },
             { id: 'washington-post', name: 'The Washington Post', description: 'American daily newspaper' },
@@ -1085,7 +1088,9 @@
                     let otherArticles = [];
 
                     articles.forEach(article => {
-                        const isFavoriteCategory = favoriteCategories.includes(article.category); // Assuming category is returned
+                        // Ensure article.category exists before checking
+                        const articleCategory = article.category || ''; // Default to empty string if undefined
+                        const isFavoriteCategory = favoriteCategories.includes(articleCategory); 
                         const isFavoriteSource = favoriteSourceIds.includes(article.source_id);
 
                         if (isFavoriteCategory || isFavoriteSource) {
@@ -1139,14 +1144,9 @@
 
         // --- Source Selection Modal ---
         /**
-         * Fetches all available sources from the backend.
-         */
-        // Removed fetchSources() function as sources are now hardcoded
-
-        /**
          * Displays sources as checkboxes in the modal.
          */
-        function displaySourcesInModal(container, currentSelection, isFavoriteModal = false) {
+        function displaySourcesInModal(container, currentSelection) {
             container.innerHTML = ''; // Clear previous content
             if (allSources.length === 0) {
                 container.innerHTML = `<p class="text-gray-600 dark:text-gray-300">Источники не найдены.</p>`;
@@ -1202,6 +1202,8 @@
         function displayFavoriteCategoriesInModal() {
             favoriteCategoriesList.innerHTML = '';
             allCategories.forEach(category => {
+                // Skip the "Все" category for favorites selection
+                if (category.id === '') return; 
                 const isChecked = favoriteCategories.includes(category.id);
                 const label = document.createElement('label');
                 label.className = 'flex items-center mb-2 cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700';
@@ -1261,7 +1263,7 @@
         }
 
         function updateFavoriteDisplays() {
-            favoriteCategoriesDisplay.textContent = `Любимые категории: ${favoriteCategories.length > 0 ? favoriteCategories.map(id => allCategories.find(c => c.id === id)?.name || id).join(', ') : 'Нет'}`;
+            favoriteCategoriesDisplay.textContent = `Любимые категории: ${favoriteCategories.length > 0 ? favoriteCategories.map(id => allCategories.find(c => c.id === id)?.name || id).filter(name => name !== 'Все').join(', ') : 'Нет'}`;
             favoriteSourcesDisplay.textContent = `Любимые источники: ${favoriteSourceIds.length > 0 ? favoriteSourceIds.map(id => allSources.find(s => s.id === id)?.name || id).join(', ') : 'Нет'}`;
         }
 
