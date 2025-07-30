@@ -1,518 +1,259 @@
-/* CSS Variables for a modern, vibrant theme */
+/* --- Глобальные переменные для нового дизайна --- */
 :root {
-    --primary-color: #6a0dad; /* Deep Purple */
-    --primary-color-dark: #4a087a; /* Darker Purple */
-    --accent-color: #00bcd4; /* Cyan/Turquoise */
-    --bg-light: #f5f7fa; /* Light Grayish Blue */
-    --text-light: #2c3e50; /* Dark Blue Gray */
-    --card-bg-light: #ffffff;
-    --card-shadow-light: rgba(0, 0, 0, 0.15);
-    --input-border-light: #d1d8e0;
-    --button-bg-light: #6a0dad;
-    --button-text-light: #ffffff;
-    --secondary-button-bg-light: #e0e6ed;
-    --secondary-button-text-light: #2c3e50;
-    --placeholder-bg-light: #e0e0e0;
-    --placeholder-text-light: #616161;
-    --toast-bg-success: #4CAF50;
-    --toast-bg-error: #f44336;
-    --toast-bg-warning: #ff9800;
-    --toast-bg-info: #2196F3;
+    --bg-color: #0D0D0F; /* Почти черный фон */
+    --surface-color: rgba(22, 24, 28, 0.75); /* Полупрозрачный для карточек */
+    --border-color: rgba(255, 255, 255, 0.1); /* Тонкая светлая граница */
+    --primary-text-color: #F0F2F5; /* Светлый основной текст */
+    --secondary-text-color: #A0AEC0; /* Второстепенный текст */
+
+    --accent-color: #00FF7F; /* Ярко-зеленый (Spring Green) */
+    --accent-hover-color: #00E673; /* Более темный зеленый при наведении */
+
+    --shadow-color: rgba(0, 255, 127, 0.1); /* Тень с оттенком акцентного цвета */
+
+    --font-main: 'Inter', sans-serif;
 }
 
+/* --- Стили для темной темы (по умолчанию) --- */
 .dark {
-    --primary-color: #9b59b6; /* Lighter Purple */
-    --primary-color-dark: #8e44ad; /* Slightly Darker Purple */
-    --accent-color: #00e5ff; /* Brighter Cyan */
-    --bg-light: #1a202c; /* Dark Blue Gray */
-    --text-light: #e2e8f0; /* Light Gray */
-    --card-bg-light: #2d3748; /* Darker Gray Blue */
-    --card-shadow-light: rgba(0, 0, 0, 0.4);
-    --input-border-light: #4a5568;
-    --button-bg-light: #9b59b6;
-    --button-text-light: #ffffff;
-    --secondary-button-bg-light: #4a5568;
-    --secondary-button-text-light: #e2e8f0;
-    --placeholder-bg-light: #3a475a;
-    --placeholder-text-light: #a0aec0;
+    /* Переменные для темной темы идентичны root, так как дизайн изначально темный */
+    --bg-color: #0D0D0F;
+    --surface-color: rgba(22, 24, 28, 0.75);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --primary-text-color: #F0F2F5;
+    --secondary-text-color: #A0AEC0;
 }
 
+/* --- Базовые стили --- */
 body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--bg-light);
-    color: var(--text-light);
-    transition: background-color 0.4s ease, color 0.4s ease;
+    background-color: var(--bg-color);
+    color: var(--primary-text-color);
+    font-family: var(--font-main);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-h1, h2, h3 {
-    font-family: 'Poppins', sans-serif;
-    color: var(--text-light);
+h1, h2, h3, h4, h5, h6 {
+    color: var(--primary-text-color);
+    font-family: var(--font-main);
+    font-weight: 700; /* Жирный для заголовков */
 }
 
-.header-content h1 {
-    font-weight: 700; /* Poppins Bold */
+/* --- Заголовок --- */
+.header-content {
+    background: none; /* Убираем градиент */
+    box-shadow: none; /* Убираем тень */
+    padding: 2rem 0;
+    text-align: center;
 }
 
+.header-content img#logo {
+    border: 2px solid var(--accent-color); /* Акцентная обводка */
+    box-shadow: 0 0 20px var(--shadow-color); /* Свечение */
+}
+
+.main-title {
+    font-size: 2.8rem;
+    font-weight: 800; /* Extra Bold */
+    letter-spacing: -1.5px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: var(--secondary-text-color);
+    font-weight: 400;
+}
+
+/* --- Карточка новостей (Эффект стекла) --- */
 .news-card {
-    border-radius: 1.25rem; /* More rounded */
-    box-shadow: 0 10px 20px -5px var(--card-shadow-light); /* Deeper shadow */
-    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease, background-color 0.3s ease;
-    overflow: hidden;
-    opacity: 0; 
-    animation: fadeIn 0.6s ease-out forwards; 
-    animation-delay: var(--animation-delay); 
-    background-color: var(--card-bg-light);
-    position: relative; /* For potential overlay effects */
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(12px); /* Размытие фона */
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: var(--animation-delay, 0s);
 }
+
 .news-card:hover {
-    transform: translateY(-8px) scale(1.02); /* More pronounced lift and slight scale */
-    box-shadow: 0 15px 30px -8px var(--card-shadow-light);
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 0 40px var(--shadow-color);
+    border-color: var(--accent-color);
 }
+
 .news-card img {
-    width: 100%;
-    height: 200px; /* Slightly taller default */
+    border-top-left-radius: 15px; /* Согласовываем скругление */
+    border-top-right-radius: 15px;
+    height: 220px;
     object-fit: cover;
-    border-top-left-radius: 1.25rem;
-    border-top-right-radius: 1.25rem;
-    margin-bottom: 1rem;
-    transition: transform 0.3s ease; /* Smooth image zoom */
+    transition: transform 0.3s ease;
 }
+
 .news-card:hover img {
-    transform: scale(1.05); /* Subtle zoom on image hover */
+    transform: scale(1.05);
 }
 
-/* Responsive image heights */
-.news-card.large-card img {
-    height: 280px; 
-}
-.news-card.medium-card img {
-    height: 220px; 
+.news-card h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
-/* Placeholder image styling */
-.news-card .placeholder-image {
-    width: 100%;
-    height: 200px; 
-    background-color: var(--placeholder-bg-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--placeholder-text-light);
-    font-weight: 600; /* Bolder text */
-    border-top-left-radius: 1.25rem;
-    border-top-right-radius: 1.25rem;
-    margin-bottom: 1rem;
-    text-align: center; 
-    padding: 15px; 
+.news-card p {
+    color: var(--secondary-text-color);
+    font-size: 0.95rem;
+}
+
+/* --- Кнопки --- */
+.nav-button, .search-button, .author-search-button, .date-quick-button, .category-button, #selectSourcesButton, #loadMoreButton, .summarize-button, .original-link {
+    font-family: var(--font-main);
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease-in-out;
+    padding: 10px 20px;
+}
+
+/* Основные кнопки (Найти, Загрузить еще и т.д.) */
+.search-button, .author-search-button, #loadMoreButton, #applySourcesButton, #applyFavoriteCategoriesButton, #applyFavoriteSourcesButton {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border-color: var(--accent-color);
+}
+
+.search-button:hover, .author-search-button:hover, #loadMoreButton:hover, #applySourcesButton:hover, #applyFavoriteCategoriesButton:hover, #applyFavoriteSourcesButton:hover {
+    background-color: var(--accent-hover-color);
+    border-color: var(--accent-hover-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--shadow-color);
+}
+
+/* Кнопки навигации и категорий */
+.nav-button, .date-quick-button, .category-button {
+    background-color: var(--surface-color);
+    color: var(--primary-text-color);
+    border: 1px solid var(--border-color);
+}
+
+.nav-button:hover, .date-quick-button:hover, .category-button:hover {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border-color: var(--accent-color);
+}
+
+.nav-button.active, .category-button.active {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+    border-color: var(--accent-color);
+    box-shadow: 0 0 15px var(--shadow-color);
+}
+
+/* --- Поля ввода --- */
+input[type="text"], input[type="date"], select {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--primary-text-color);
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus, input[type="date"]:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 10px var(--shadow-color);
+}
+
+/* --- Модальные окна --- */
+.modal {
+    background-color: rgba(0, 0, 0, 0.85); /* Более темный фон */
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    color: var(--primary-text-color);
+}
+
+.close-button:hover {
+    color: var(--accent-color);
+}
+
+/* --- Ссылка "Читать далее" и кнопки действий --- */
+.read-more-button {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.read-more-button:hover {
+    text-decoration: underline;
+    color: var(--accent-hover-color);
+}
+
+.bookmark-button, .share-button {
+    color: var(--secondary-text-color);
     font-size: 1.1rem;
 }
-.news-card.large-card .placeholder-image {
-    height: 280px;
+
+.bookmark-button:hover, .share-button:hover {
+    color: var(--accent-color);
+    transform: scale(1.1);
 }
-.news-card.medium-card .placeholder-image {
-    height: 220px;
+
+.bookmark-button i.fas {
+    color: var(--accent-color);
+}
+
+/* --- Секция суммаризации --- */
+.summary-content {
+    background-color: rgba(0, 255, 127, 0.05); /* Легкий фон с акцентом */
+    border-left: 3px solid var(--accent-color);
+    padding: 1rem;
+    border-radius: 8px;
+    font-style: normal;
+}
+
+/* --- Анимации и индикаторы --- */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .loading-spinner {
-    border: 5px solid rgba(0, 0, 0, 0.1);
-    border-left-color: var(--primary-color);
-    border-radius: 50%;
+    border: 4px solid var(--border-color);
+    border-left-color: var(--accent-color);
     width: 50px;
     height: 50px;
     animation: spin 1s linear infinite;
 }
-.dark .loading-spinner {
-    border-color: rgba(255, 255, 255, 0.1);
-    border-left-color: var(--primary-color);
-}
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 
-/* Buttons Styling */
-.nav-button, .search-button, .author-search-button, .date-quick-button, #selectSourcesButton, #loadMoreButton, .summarize-button, .original-link {
-    border-radius: 0.75rem; /* More rounded buttons */
-    font-weight: 600; /* Bolder text */
-    transition: all 0.2s ease-in-out;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
-.nav-button {
-    background-color: var(--secondary-button-bg-light);
-    color: var(--secondary-button-text-light);
-}
-.nav-button:hover {
-    background-color: var(--secondary-button-bg-light);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15);
-}
-.nav-button.active {
-    background-color: var(--primary-color);
-    color: var(--button-text-light);
-    box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
-
-.search-button, .author-search-button, #selectSourcesButton, #loadMoreButton, #applySourcesButton, #applyFavoriteCategoriesButton, #applyFavoriteSourcesButton {
-    background-color: var(--primary-color);
-    color: var(--button-text-light);
-}
-.search-button:hover, .author-search-button:hover, #selectSourcesButton:hover, #loadMoreButton:hover, #applySourcesButton:hover, #applyFavoriteCategoriesButton:hover, #applyFavoriteSourcesButton:hover {
-    background-color: var(--primary-color-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px -2px rgba(0, 0, 0, 0.15);
-}
-
-.date-quick-button, .category-button {
-    background-color: var(--secondary-button-bg-light);
-    color: var(--secondary-button-text-light);
-    border-radius: 9999px; /* Pill shape */
-    padding: 0.6rem 1.2rem;
-    font-size: 0.9rem;
-}
-.date-quick-button:hover, .category-button:hover {
-    background-color: var(--secondary-button-bg-light);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.1);
-}
-.category-button.active {
-    background-color: var(--accent-color); /* Use accent color for active category */
-    color: white;
-    box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.2);
-    transform: translateY(-2px);
-}
-
-/* Input fields */
-input[type="text"], input[type="date"], select {
-    border: 1px solid var(--input-border-light);
-    background-color: var(--card-bg-light);
-    color: var(--text-light);
-    border-radius: 0.75rem;
-    padding: 0.8rem 1rem;
-    transition: all 0.2s ease;
-}
-input[type="text"]:focus, input[type="date"]:focus, select:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(106, 13, 173, 0.2); /* Purple glow */
-    outline: none;
-}
-
-/* Share buttons */
-.share-button {
-    color: var(--text-light);
-    background-color: var(--secondary-button-bg-light);
-}
-.share-button:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-.share-button.twitter { color: #1DA1F2; } .share-button.twitter:hover { background-color: #1DA1F2; color: white; }
-.share-button.facebook { color: #1877F2; } .share-button.facebook:hover { background-color: #1877F2; color: white; }
-.share-button.whatsapp { color: #25D366; } .share-button.whatsapp:hover { background-color: #25D366; color: white; }
-.share-button.viber { color: #7360F2; } .share-button.viber:hover { background-color: #7360F2; color: white; }
-.share-button.telegram { color: #0088CC; } .share-button.telegram:hover { background-color: #0088CC; color: white; }
-.share-button.vk { color: #4C75A3; } .share-button.vk:hover { background-color: #4C75A3; color: white; }
-.share-button.copy { color: #6B7280; } .share-button.copy:hover { background-color: #6B7280; color: white; }
-
-/* Bookmark button */
-.bookmark-button {
-    color: var(--primary-color); /* Always purple */
-    background-color: var(--secondary-button-bg-light);
-}
-.bookmark-button:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-.bookmark-button i.fas {
-    color: var(--primary-color); /* Active bookmark icon color */
-}
-.dark .bookmark-button i.fas {
-    color: var(--accent-color); /* Active bookmark icon color in dark mode */
-}
-
-
-/* General UI Polish */
-.main-title {
-    font-size: 3.2rem; /* Larger title */
-    line-height: 1.1;
-    font-weight: 700;
-}
-.subtitle {
-    font-size: 1.25rem; 
-    color: var(--text-light);
-    opacity: 0.8;
-}
-.news-card h2 {
-    font-size: 1.4rem; 
-    line-height: 1.3;
-    font-weight: 600;
-}
-.news-card p {
-    font-size: 1rem; 
-    line-height: 1.5;
-    color: var(--text-light);
-    opacity: 0.9;
-}
-.read-more-button {
-    font-size: 1rem; 
-    color: var(--primary-color);
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s ease;
-}
-.read-more-button:hover {
-    color: var(--accent-color);
-    transform: translateX(3px);
-}
-
-/* Header Layout */
-.header-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 1.5rem; /* More space */
-    padding: 2rem 0;
-    background: linear-gradient(135deg, var(--primary-color), var(--primary-color-dark)); /* Gradient background */
-    border-radius: 1.5rem;
-    box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.25);
-    color: white;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
-}
-.header-content img {
-    border: 4px solid white; /* White border for logo */
-    box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-.header-content h1, .header-content p {
-    color: white; /* Ensure text is white on dark gradient */
-}
-
-@media (max-width: 640px) { 
-    .header-content {
-        flex-direction: column;
-        text-align: center;
-        padding: 1.5rem 0;
-    }
-    .main-title {
-        font-size: 2.5rem;
-    }
-    .subtitle {
-        font-size: 1rem;
-    }
-}
-
-/* Modal styles */
-.modal {
-    position: fixed;
-    z-index: 100; /* High z-index to be on top */
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.8); /* Darker overlay */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-.modal.show {
-    opacity: 1;
-    visibility: visible;
-}
-.modal-content {
-    background-color: var(--card-bg-light);
-    margin: auto;
-    padding: 20px;
-    border-radius: 1.5rem; /* More rounded */
-    width: 90%;
-    max-width: 700px; /* Slightly wider */
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-    transform: translateY(-50px); /* Initial state for animation */
-    transition: transform 0.3s ease;
-    position: relative;
-    max-height: 80vh; /* Limit height for scrollable content */
-    display: flex;
-    flex-direction: column;
-    color: var(--text-light);
-}
-.modal.show .modal-content {
-    transform: translateY(0); /* Animate to original position */
-}
-.close-button {
-    position: absolute;
-    top: 15px;
-    right: 20px;
-    font-size: 32px; /* Larger close button */
-    font-weight: bold;
-    color: var(--text-light); /* Use main text color */
-    cursor: pointer;
-    transition: color 0.2s ease, transform 0.2s ease;
-}
-.close-button:hover,
-.close-button:focus {
-    color: var(--primary-color);
-    transform: scale(1.2);
-    text-decoration: none;
-    cursor: pointer;
-}
-.sources-list {
-    max-height: 50vh; /* Make list scrollable */
-    overflow-y: auto;
-    padding-right: 10px; /* For scrollbar */
-    margin-bottom: 1rem;
-}
-.sources-list label {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s ease;
-}
-.sources-list label:hover {
-    background-color: var(--secondary-button-bg-light);
-}
-.sources-list input[type="checkbox"] {
-    margin-right: 0.75rem;
-    transform: scale(1.2);
-    accent-color: var(--primary-color); /* Style checkbox */
-}
-
-/* Summarization */
-.summary-content {
-    margin-top: 1rem;
-    padding: 1rem;
-    background-color: rgba(0, 189, 212, 0.1); /* Lighter accent color */
-    border-radius: 0.75rem;
-    font-style: italic;
-    color: var(--text-light);
-    border-left: 4px solid var(--accent-color); /* Accent border */
-}
-.dark .summary-content {
-    background-color: rgba(0, 229, 255, 0.1);
-}
-.summary-loading-spinner {
-    border: 2px solid rgba(0, 0, 0, 0.1);
-    border-left-color: var(--primary-color);
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    animation: spin 1s linear infinite;
-    display: inline-block;
-    margin-left: 0.5rem;
-}
-.dark .summary-loading-spinner {
-    border-color: rgba(255, 255, 255, 0.1);
-    border-left-color: var(--primary-color);
-}
-
-/* Toast Notification Styles */
+/* --- Тост-уведомления --- */
 .toast-notification {
-    position: fixed;
-    bottom: 30px; /* Slightly higher */
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--toast-bg-success); 
-    color: white;
-    padding: 12px 25px; /* More padding */
-    border-radius: 10px; /* More rounded */
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
-    z-index: 1000;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3); /* Deeper shadow */
-    font-weight: 500;
-}
-.toast-notification.show {
-    opacity: 1;
-    visibility: visible;
+    background-color: var(--surface-color);
+    color: var(--primary-text-color);
+    border: 1px solid var(--accent-color);
+    box-shadow: 0 0 20px var(--shadow-color);
 }
 
-/* Scroll to Top Button */
+/* --- Кнопка "Наверх" --- */
 #scrollToTopBtn {
-    display: none; 
-    position: fixed; 
-    bottom: 40px; 
-    right: 40px; 
-    z-index: 99; 
-    border: none; 
-    outline: none; 
     background-color: var(--accent-color);
-    color: white;
-    cursor: pointer; 
-    padding: 18px; /* Larger button */
-    border-radius: 50%; 
-    font-size: 20px; 
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.3s, opacity 0.3s, transform 0.2s ease;
+    color: var(--bg-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    box-shadow: 0 4px 15px var(--shadow-color);
 }
 
 #scrollToTopBtn:hover {
-    background-color: var(--primary-color);
+    background-color: var(--accent-hover-color);
     transform: translateY(-3px);
-}
-
-/* Full Article Modal Specific Styles */
-#articleDetailModal .modal-content {
-    max-width: 900px;
-    max-height: 90vh;
-    overflow-y: auto;
-    text-align: left;
-    padding: 30px; /* More padding */
-}
-#articleDetailModal img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0.75rem; /* More rounded */
-    margin-bottom: 1.5rem;
-}
-#articleDetailModal h2 {
-    font-size: 2.5rem; /* Larger title */
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-#articleDetailModal p {
-    font-size: 1.1rem; /* Slightly larger text */
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-}
-#articleDetailModal .original-link {
-    display: inline-block;
-    margin-top: 1rem;
-    padding: 0.8rem 1.8rem; /* More padding */
-    background-color: var(--primary-color); 
-    color: white;
-    border-radius: 0.75rem; 
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-#articleDetailModal .original-link:hover {
-    background-color: var(--primary-color-dark);
-    transform: translateY(-2px);
-}
-/* Placeholder for modal image */
-#articleDetailImageContainer .placeholder-image {
-    width: 100%;
-    height: 300px; /* Taller placeholder for modal */
-    background-color: var(--placeholder-bg-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--placeholder-text-light);
-    font-weight: 600;
-    border-radius: 0.75rem;
-    margin-bottom: 1.5rem;
-    text-align: center;
-    padding: 15px;
-    font-size: 1.2rem;
 }
