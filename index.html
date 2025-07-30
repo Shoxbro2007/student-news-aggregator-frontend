@@ -1,93 +1,330 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark"> <head>
+<html lang="ru" class="light">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student News Aggregator | Актуальные новости для студентов</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <link rel="stylesheet" href="style.css">
-    
+    <!-- SEO Meta Tags (initial values, will be dynamically updated by JS) -->
     <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
+    <meta name="author" content="Student News Aggregator">
+
+    <!-- Open Graph / Social Media Meta Tags (initial values, will be dynamically updated by JS) -->
+    <meta property="og:title" content="Student News Aggregator | Актуальные новости для студентов">
+    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://studnews.ru/"> 
+    <meta property="og:image" content="https://studnews.ru/NSA.jpg"> 
+    <meta property="og:site_name" content="Student News Aggregator">
+
+    <!-- Twitter Card (initial values, will be dynamically updated by JS) -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Student News Aggregator | Актуальные новости для студентов">
+    <meta name="twitter:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta name="twitter:image" content="https://studnews.ru/NSA.jpg">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Poppins (for headings) and Inter (for body) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- WebP Polyfill for older browsers -->
+    <script src="https://cdn.jsdelivr.net/npm/webp-polyfill@1.0.1/webp-polyfill.min.js"></script>
+
+    <!-- Link to external CSS file -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
+    <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
+
+    <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
-        // Yandex.Metrika и Google Analytics остаются здесь
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=103520261', 'ym');
+
+        ym(103520261, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
     </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+    <!-- Google Analytics 4 -->
+    <!-- Replace G-XXXXXXX with your actual GA4 Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXX');
+    </script>
+
+    <!-- JSON-LD Microdata (will be dynamically updated by JS) -->
+    <script type="application/ld+json"></script>
+
+    <!-- Disqus Comment Count Script -->
+    <script id="dsq-count-scr" src="//studnews-ru.disqus.com/count.js" async></script>
 </head>
-<body class="min-h-screen flex flex-col items-center py-8 px-4">
+<body class="min-h-screen flex flex-col items-center py-8 px-4 transition-colors duration-300">
 
     <header class="w-full max-w-4xl text-center mb-12 relative">
         <div class="header-content">
-            <img id="logo" src="NSA.jpg" alt="Логотип SNA" class="h-24 w-24 rounded-full">
+            <!-- Your Profile Logo (NSA.jpg) -->
+            <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-24 w-24 rounded-full shadow-lg transition-colors duration-300">
             <div>
-                <h1 class="main-title">Новости для Студентов</h1>
-                <p class="subtitle">Ваш персональный агрегатор событий, советов и возможностей.</p>
+                <h1 class="main-title mb-2">Главные новости для студентов</h1>
+                <p class="subtitle">Будьте в курсе последних событий, советов и возможностей!</p>
             </div>
         </div>
         
-        <button id="themeToggle" class="absolute top-4 right-4 p-3 rounded-full" aria-label="Переключить тему">
+        <!-- Dark Mode Toggle Button -->
+        <button id="themeToggle" class="absolute top-4 right-4 p-3 rounded-full bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-color transition-colors duration-300 shadow-md" aria-label="Переключить темную/светлую тему">
             <i class="fas fa-moon" id="themeIcon"></i>
         </button>
     </header>
 
     <main class="w-full max-w-4xl flex flex-col items-center">
+        <!-- Navigation Buttons for different views -->
         <div class="w-full max-w-xl mb-10 flex flex-wrap justify-center gap-4">
-            <button id="mainNewsNavButton" class="nav-button active" data-view="main">
+            <button id="mainNewsNavButton" class="nav-button px-7 py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color transition duration-150 ease-in-out active" data-view="main" aria-label="Перейти к главным новостям">
                 <i class="fas fa-newspaper mr-2"></i> Главные новости
             </button>
-            <button id="bookmarksNavButton" class="nav-button" data-view="bookmarks">
+            <button id="bookmarksNavButton" class="nav-button px-7 py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color transition duration-150 ease-in-out" data-view="bookmarks" aria-label="Перейти к моим закладкам">
                 <i class="fas fa-bookmark mr-2"></i> Мои закладки
             </button>
-            <button id="historyNavButton" class="nav-button" data-view="history">
-                <i class="fas fa-history mr-2"></i> История
+            <button id="historyNavButton" class="nav-button px-7 py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color transition duration-150 ease-in-out" data-view="history" aria-label="Перейти к истории просмотров">
+                <i class="fas fa-history mr-2"></i> История просмотров
             </button>
         </div>
 
+        <!-- Main News Section -->
         <section id="mainPageView" class="w-full flex flex-col items-center">
-            
-            <div class="w-full max-w-xl mb-6 flex flex-col sm:flex-row items-center gap-4">
-                <input type="text" id="searchInput" placeholder="Поиск по теме..." class="flex-grow w-full">
-                <button id="searchButton" class="w-full sm:w-auto">Найти</button>
+            <!-- Search Input and Button -->
+            <div class="w-full max-w-xl mb-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="searchInput" placeholder="Введите тему новостей (например, 'ИИ', 'стипендии', 'карьера')"
+                       class="flex-grow w-full sm:w-auto p-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-white transition-colors duration-300" aria-label="Поиск новостей по теме">
+                <button id="searchButton"
+                        class="w-full sm:w-auto px-7 py-3 bg-blue-600 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color focus:ring-offset-2 transition duration-150 ease-in-out" aria-label="Найти новости">
+                    Найти новости
+                </button>
             </div>
-            
+
+            <!-- Author Search Input and Button -->
+            <div class="w-full max-w-xl mb-10 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <input type="text" id="authorSearchInput" placeholder="Найти по автору (например, 'Иван Иванов')"
+                       class="flex-grow w-full sm:w-auto p-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-white transition-colors duration-300" aria-label="Поиск новостей по автору">
+                <button id="authorSearchButton"
+                        class="w-full sm:w-auto px-7 py-3 bg-indigo-600 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color focus:ring-offset-2 transition duration-150 ease-in-out" aria-label="Найти новости по автору">
+                    Найти автора
+                </button>
+            </div>
+
+            <!-- Date Filter Inputs and Quick Buttons -->
+            <div class="w-full max-w-xl mb-8 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <label for="fromDate" class="text-gray-700 dark:text-gray-300">С даты:</label>
+                <input type="date" id="fromDate"
+                       class="flex-grow w-full sm:w-auto p-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-white transition-colors duration-300" aria-label="Фильтр новостей с даты">
+                
+                <label for="toDate" class="text-gray-700 dark:text-gray-300">По дату:</label>
+                <input type="date" id="toDate"
+                       class="flex-grow w-full sm:w-auto p-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-white transition-colors duration-300" aria-label="Фильтр новостей по дату">
+            </div>
             <div class="w-full max-w-xl mb-10 flex flex-wrap justify-center gap-3">
-                 <button class="category-button active" data-category=""><i class="fas fa-globe mr-2"></i>Все</button>
-                 <button class="category-button" data-category="technology"><i class="fas fa-microchip mr-2"></i>Технологии</button>
-                 </div>
+                <button class="date-quick-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-days="1" aria-label="Показать новости за 24 часа">За 24 часа</button>
+                <button class="date-quick-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-days="7" aria-label="Показать новости за 7 дней">За 7 дней</button>
+                <button class="date-quick-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out" data-days="30" aria-label="Показать новости за 30 дней">За 30 дней</button>
+            </div>
+
+
+            <!-- Language and Source Selection Buttons -->
+            <div class="w-full max-w-xl mb-10 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 justify-center">
+                <div class="flex items-center space-x-3">
+                    <label for="languageSelect" class="text-gray-700 dark:text-gray-300 font-semibold">Язык:</label>
+                    <select id="languageSelect" class="p-3 border rounded-lg focus:outline-none focus:ring-2 text-gray-800 dark:text-white transition-colors duration-300" aria-label="Выбрать язык новостей">
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                        <option value="de">Deutsch</option>
+                        <option value="fr">Français</option>
+                        <option value="es">Español</option>
+                        <option value="it">Italiano</option>
+                        <option value="pt">Português</option>
+                        <option value="zh">中文</option>
+                        <option value="ar">العربية</option>
+                    </select>
+                </div>
+                <button id="selectSourcesButton"
+                        class="px-7 py-3 bg-purple-600 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color focus:ring-offset-2 transition duration-150 ease-in-out" aria-label="Выбрать источники новостей">
+                    Выбрать источники
+                </button>
+            </div>
+
+            <!-- Category Buttons -->
+            <div id="categoryButtons" class="w-full max-w-4xl mb-12 flex flex-wrap justify-center gap-3">
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="" aria-label="Показать все категории новостей"><i class="fas fa-globe mr-2"></i>Все</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="technology" aria-label="Показать новости категории Технологии"><i class="fas fa-microchip mr-2"></i>Технологии</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="science" aria-label="Показать новости категории Наука"><i class="fas fa-flask mr-2"></i>Наука</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="sports" aria-label="Показать новости категории Спорт"><i class="fas fa-futbol mr-2"></i>Спорт</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="health" aria-label="Показать новости категории Здоровье"><i class="fas fa-heartbeat mr-2"></i>Здоровье</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="business" aria-label="Показать новости категории Бизнес"><i class="fas fa-chart-line mr-2"></i>Бизнес</button>
+                <button class="category-button px-5 py-2 font-medium rounded-full transition duration-150 ease-in-out flex items-center" data-category="entertainment" aria-label="Показать новости категории Развлечения"><i class="fas fa-film mr-2"></i>Развлечения</button>
+            </div>
+
+            <!-- Favorite Categories/Sources Section -->
+            <div class="w-full max-w-xl mb-12 p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl">
+                <h3 class="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-100">Ваши предпочтения</h3>
+                <div class="flex flex-wrap gap-3 mb-5">
+                    <button id="manageFavoriteCategoriesButton" class="px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition duration-150 ease-in-out shadow-md" aria-label="Управлять любимыми категориями">
+                        Управлять любимыми категориями
+                    </button>
+                    <button id="manageFavoriteSourcesButton" class="px-6 py-3 bg-yellow-500 text-white font-semibold rounded-lg hover:bg-yellow-600 transition duration-150 ease-in-out shadow-md" aria-label="Управлять любимыми источниками">
+                        Управлять любимыми источниками
+                    </button>
+                </div>
+                <div id="favoriteCategoriesDisplay" class="text-gray-700 dark:text-gray-300 mb-2 font-medium">
+                    Любимые категории: Нет
+                </div>
+                <div id="favoriteSourcesDisplay" class="text-gray-700 dark:text-gray-300 font-medium">
+                    Любимые источники: Нет
+                </div>
+            </div>
 
             <div id="loadingIndicator" class="flex flex-col items-center justify-center py-16">
                 <div class="loading-spinner mb-6"></div>
-                <p>Загрузка новостей...</p>
+                <p class="text-gray-600 dark:text-gray-300 text-xl font-medium transition-colors duration-300">Загрузка последних новостей...</p>
             </div>
-            <div id="newsContainer" class="flex flex-wrap gap-8 w-full hidden">
-                </div>
-            
-            <button id="loadMoreButton" class="hidden mt-12">Загрузить больше</button>
 
-            <div id="errorMessage" class="hidden text-center mt-12 p-6">
-                <p id="errorText">Произошла ошибка.</p>
+            <div id="newsContainer" class="flex flex-wrap gap-8 w-full hidden">
+                <!-- News articles will be injected here by JavaScript -->
+            </div>
+
+            <!-- Load More Button -->
+            <button id="loadMoreButton"
+                    class="hidden mt-12 px-8 py-4 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-150 ease-in-out shadow-lg" aria-label="Загрузить больше новостей">
+                Загрузить больше
+            </button>
+
+            <!-- Updated Error Message Container -->
+            <div id="errorMessage" class="hidden text-red-600 dark:text-red-300 text-center mt-12 p-6 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 rounded-lg transition-colors duration-300 shadow-md">
+                <p id="errorText" class="font-semibold text-lg">Произошла ошибка при загрузке новостей.</p>
+                <p class="mt-2">Пожалуйста, попробуйте обновить страницу или изменить критерии поиска/фильтрации.</p>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="w-full max-w-xl mt-16 p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl text-center">
+                <h3 class="text-2xl font-semibold mb-5 text-gray-900 dark:text-gray-100">Обратная связь</h3>
+                <p class="text-gray-700 dark:text-gray-300 mb-5 text-lg">Мы ценим ваше мнение! Если у вас есть предложения, вопросы или вы заметили ошибку, пожалуйста, напишите нам:</p>
+                <a href="mailto:Shoxbro2007@gmail.com?subject=Обратная связь по Student News Aggregator" 
+                   class="inline-block px-8 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out shadow-lg" aria-label="Написать нам письмо">
+                    Написать нам
+                </a>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-3">
+                    (Ваш адрес электронной почты: Shoxbro2007@gmail.com)
+                </p>
             </div>
         </section>
-        
+
+        <!-- Bookmarks Section -->
         <section id="bookmarksPageView" class="w-full flex-col items-center hidden">
-            </section>
+            <h2 class="text-3xl font-bold mb-10 text-gray-800 dark:text-white transition-colors duration-300">Мои закладки</h2>
+            <div id="bookmarksContainer" class="flex flex-wrap gap-8 w-full">
+                <!-- Bookmarked articles will be injected here -->
+                <p id="noBookmarksMessage" class="text-gray-600 dark:text-gray-300 text-xl font-medium text-center w-full">У вас пока нет сохраненных закладок.</p>
+            </div>
+        </section>
+
+        <!-- History Section -->
         <section id="historyPageView" class="w-full flex-col items-center hidden">
-            </section>
+            <h2 class="text-3xl font-bold mb-10 text-gray-800 dark:text-white transition-colors duration-300">История просмотров</h2>
+            <div id="historyContainer" class="flex flex-wrap gap-8 w-full">
+                <!-- Viewed articles will be injected here -->
+                <p id="noHistoryMessage" class="text-gray-600 dark:text-gray-300 text-xl font-medium text-center w-full">Ваша история просмотров пуста.</p>
+            </div>
+        </section>
 
     </main>
-    
+
+    <!-- Sources Modal -->
     <div id="sourcesModal" class="modal">
-       </div>
-    
-    <button id="scrollToTopBtn" title="Наверх">
+        <div class="modal-content">
+            <span class="close-button" id="closeModalButton" aria-label="Закрыть окно выбора источников">&times;</span>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Выберите источники новостей</h2>
+            <div id="sourcesList" class="sources-list flex-grow">
+                <!-- Sources checkboxes will be loaded here -->
+                <p class="text-gray-600 dark:text-gray-300">Загрузка источников...</p>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="applySourcesButton" class="px-7 py-3 font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-color focus:ring-offset-2 transition duration-150 ease-in-out shadow-md" aria-label="Применить выбранные источники">
+                    Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorite Categories Modal -->
+    <div id="favoriteCategoriesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeFavCategoriesModalButton" aria-label="Закрыть окно любимых категорий">&times;</span>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Выберите любимые категории</h2>
+            <div id="favoriteCategoriesList" class="sources-list flex-grow">
+                <!-- Category checkboxes will be loaded here -->
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="applyFavoriteCategoriesButton" class="px-7 py-3 font-semibold rounded-lg transition duration-150 ease-in-out shadow-md" aria-label="Применить любимые категории">
+                    Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Favorite Sources Modal -->
+    <div id="favoriteSourcesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeFavSourcesModalButton" aria-label="Закрыть окно любимых источников">&times;</span>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Выберите любимые источники</h2>
+            <div id="favoriteSourcesList" class="sources-list flex-grow">
+                <!-- Source checkboxes will be loaded here -->
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="applyFavoriteSourcesButton" class="px-7 py-3 font-semibold rounded-lg transition duration-150 ease-in-out shadow-md" aria-label="Применить любимые источники">
+                    Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Article Detail Modal (New) -->
+    <div id="articleDetailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" id="closeArticleDetailModalButton" aria-label="Закрыть окно статьи">&times;</span>
+            <!-- Image will be rendered here, either actual or placeholder -->
+            <div id="articleDetailImageContainer" class="w-full h-auto rounded-lg mb-6 flex items-center justify-center overflow-hidden"></div>
+            
+            <h2 id="articleDetailTitle" class="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4"></h2>
+            <p id="articleDetailSnippet" class="text-gray-700 dark:text-gray-300 mb-6 text-lg"></p>
+            <p class="text-base text-gray-500 dark:text-gray-400 mb-6 font-medium">Источник: <span id="articleDetailSource"></span> | Автор: <span id="articleDetailAuthor"></span> | Опубликовано: <span id="articleDetailDate"></span></p>
+            <a id="articleDetailOriginalLink" href="#" target="_blank" rel="noopener noreferrer" class="original-link shadow-md">
+                Читать оригинал статьи &rarr;
+            </a>
+
+            <!-- Disqus Comments Section -->
+            <div id="disqus_thread" class="mt-10 p-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl"></div>
+            <noscript>Включите JavaScript, чтобы прочитать комментарии.</noscript>
+        </div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollToTopBtn" title="Наверх" aria-label="Прокрутить страницу наверх">
         <i class="fas fa-arrow-up"></i>
     </button>
-    
+
+    <!-- Toast Notification Container -->
     <div id="toastContainer" class="toast-notification"></div>
 
+    <!-- Link to external JavaScript file -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
