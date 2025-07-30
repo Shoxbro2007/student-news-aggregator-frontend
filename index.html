@@ -236,34 +236,6 @@
             background-color: #4b5563; /* Gray-700 */
             color: #e5e7eb; /* Gray-200 */
         }
-
-        /* Styles for summarization */
-        .summary-content {
-            margin-top: 1rem;
-            padding: 0.75rem;
-            background-color: #e0f2fe; /* Light blue */
-            border-radius: 0.5rem;
-            font-style: italic;
-            color: #0c4a6e; /* Darker blue text */
-        }
-        .dark .summary-content {
-            background-color: #1a202c; /* Darker background */
-            color: #a0aec0; /* Lighter text */
-        }
-        .summary-loading-spinner {
-            border: 2px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #2563eb;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-left: 0.5rem;
-        }
-        .dark .summary-loading-spinner {
-            border-color: rgba(255, 255, 255, 0.1);
-            border-left-color: #63b3ed;
-        }
     </style>
     <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
     <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
@@ -718,43 +690,6 @@
             localStorage.setItem('viewedArticlesHistory', JSON.stringify(viewedArticlesHistory));
         }
 
-        // --- AI Summarization ---
-        /**
-         * Fetches an AI summary for a given article text.
-         * @param {string} articleText - The text of the article to summarize.
-         * @param {HTMLElement} summaryContainer - The DOM element to display the summary in.
-         * @param {HTMLElement} summarizeButton - The button that triggered the summarization.
-         */
-        async function fetchAISummary(articleText, summaryContainer, summarizeButton) {
-            summaryContainer.innerHTML = '<div class="summary-loading-spinner"></div> Загрузка резюме...';
-            summaryContainer.classList.remove('hidden');
-            summarizeButton.disabled = true; // Disable button during loading
-
-            try {
-                const response = await fetch(`${BACKEND_API_URL}/summarize`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ article_text: articleText })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || 'Ошибка при получении резюме от AI.');
-                }
-
-                const data = await response.json();
-                summaryContainer.innerHTML = `<p>${data.summary}</p>`;
-            } catch (error) {
-                console.error("Error fetching AI summary:", error);
-                summaryContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Ошибка: ${error.message}</p>`;
-            } finally {
-                summarizeButton.disabled = false; // Re-enable button
-            }
-        }
-
-
         // --- News Card Creation ---
         /**
          * Creates a news card element.
@@ -802,12 +737,6 @@
                 <div>
                     <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">${article.source_title || 'Неизвестный источник'}</h2>
                     <p class="mb-4 text-gray-700 dark:text-gray-300">${article.snippet || 'Нет описания.'}</p>
-                    <div class="summary-area">
-                        <button class="summarize-button px-3 py-1 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600 transition duration-150 ease-in-out mt-2">
-                            Суммировать с AI
-                        </button>
-                        <div class="summary-content hidden text-sm"></div>
-                    </div>
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Автор: ${article.author || 'Неизвестно'}</p>
                 </div>
                 <div class="flex items-center justify-between mt-4">
@@ -875,22 +804,6 @@
             if (readMoreLink) {
                 readMoreLink.addEventListener('click', () => {
                     addArticleToHistory(article);
-                });
-            }
-
-            // Add event listener for Summarize button
-            const summarizeButton = newsCard.querySelector('.summarize-button');
-            const summaryContentDiv = newsCard.querySelector('.summary-content');
-            if (summarizeButton && summaryContentDiv) {
-                summarizeButton.addEventListener('click', () => {
-                    // Use snippet for summarization, as full content might not be available
-                    const textToSummarize = article.snippet || article.title || '';
-                    if (textToSummarize) {
-                        fetchAISummary(textToSummarize, summaryContentDiv, summarizeButton);
-                    } else {
-                        summaryContentDiv.innerHTML = '<p class="text-red-500 dark:text-red-300">Нет текста для суммаризации.</p>';
-                        summaryContentDiv.classList.remove('hidden');
-                    }
                 });
             }
 
@@ -1361,3 +1274,4 @@
     </script>
 </body>
 </html>
+
