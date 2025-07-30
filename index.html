@@ -5,23 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Новости для студентов | Актуальные события, образование, карьера</title>
     
-    <!-- SEO Meta Tags -->
+    <!-- SEO Meta Tags (initial values, will be dynamically updated by JS) -->
     <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
     <meta name="author" content="Student News Aggregator">
 
-    <!-- Open Graph / Social Media Meta Tags (for better sharing previews) -->
+    <!-- Open Graph / Social Media Meta Tags (initial values, will be dynamically updated by JS) -->
     <meta property="og:title" content="Новости для студентов | Актуальные события, образование, карьера">
-    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://studnews.ru/"> <!-- Обновлено на ваш новый домен -->
     <meta property="og:image" content="https://studnews.ru/NSA.jpg"> <!-- Обновлено на ваш новый домен -->
     <meta property="og:site_name" content="Student News Aggregator">
 
-    <!-- Twitter Card -->
+    <!-- Twitter Card (initial values, will be dynamically updated by JS) -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Новости для студентов | Актуальные события, образование, карьера">
-    <meta name="twitter:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta name="twitter:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta name="twitter:image" content="https://studnews.ru/NSA.jpg">
 
     <!-- Tailwind CSS CDN -->
@@ -375,6 +375,16 @@
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/103520261" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
+
+    <!-- Google Analytics 4 -->
+    <!-- Replace G-XXXXXXX with your actual GA4 Measurement ID -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXX');
+    </script>
 
     <!-- JSON-LD Microdata (will be dynamically updated by JS) -->
     <script type="application/ld+json"></script>
@@ -1028,6 +1038,7 @@
                         <a href="${article.url || '#'}#disqus_thread" data-disqus-url="${article.url}" class="text-sm text-gray-500 dark:text-gray-400 flex items-center hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200">
                             <i class="fas fa-comments mr-1"></i> <span class="disqus-comment-count">0</span>
                         </a>
+                        
                         <button class="share-button twitter text-blue-500 hover:bg-blue-500 hover:text-white" data-platform="twitter" data-url="${article.url}" data-title="${article.snippet || article.source_title || 'Новость'}" data-source-id="${article.source_id || ''}">
                             <i class="fab fa-twitter"></i>
                         </button>
@@ -1087,19 +1098,7 @@
             const readMoreButton = newsCard.querySelector('.read-more-button');
             if (readMoreButton) {
                 readMoreButton.addEventListener('click', () => {
-                    // Assuming 'articles' array holds the currently displayed articles
-                    // We need to get the full article object from the newsContainer's children
-                    // This assumes that the `newsContainer` is populated with the `articles` array
-                    // and the index corresponds to the original article in that array.
-                    // A more robust solution might pass the article object directly or store it.
-                    // For simplicity, let's assume `articles` is globally accessible or passed.
-                    // For now, we'll rely on the `fetchAndDisplayNews` to have populated `newsContainer`
-                    // and then retrieve the article from the `newsContainer`'s dataset if needed.
-                    // A better way would be to pass the article object directly to openArticleDetail
-                    // from where `createNewsCard` is called.
-                    // For this example, I'll pass the whole article object to the button's data.
-                    // This requires a slight change in how `createNewsCard` is called if it's not already doing so.
-                    // Let's assume for simplicity that the `article` object is accessible here.
+                    // Pass the article object directly to openArticleDetail
                     openArticleDetail(article);
                 });
             }
@@ -1214,7 +1213,7 @@
                 // If not loaded, create and append the script to the DOM
                 const s = document.createElement('script');
                 s.src = 'https://studnews-ru.disqus.com/embed.js'; // Your Disqus shortname
-                s.setAttribute('data-timestamp', +new Date());
+                s.setAttribute('data-timestamp', +new Date()); // Add timestamp to prevent caching
                 (document.head || document.body).appendChild(s);
             }
         }
