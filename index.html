@@ -63,6 +63,31 @@
         .news-card.medium-card img {
             height: 200px; /* Slightly taller than standard, shorter than large */
         }
+        /* Placeholder image styling */
+        .news-card .placeholder-image {
+            width: 100%;
+            height: 180px; /* Match img height */
+            background-color: #e0e0e0; /* Light gray */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #616161; /* Darker gray text */
+            font-weight: 500;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .dark .news-card .placeholder-image {
+            background-color: #374151; /* Darker gray */
+            color: #a0aec0; /* Lighter gray text */
+        }
+        .news-card.large-card .placeholder-image {
+            height: 250px;
+        }
+        .news-card.medium-card .placeholder-image {
+            height: 200px;
+        }
+
         .loading-spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left-color: #2563eb;
@@ -623,7 +648,9 @@
     <div id="articleDetailModal" class="modal">
         <div class="modal-content">
             <span class="close-button" id="closeArticleDetailModalButton">&times;</span>
-            <img id="articleDetailImage" src="" alt="Изображение статьи" class="w-full h-auto rounded-lg mb-4">
+            <!-- Image will be rendered here, either actual or placeholder -->
+            <div id="articleDetailImageContainer" class="w-full h-auto rounded-lg mb-4 flex items-center justify-center overflow-hidden"></div>
+            
             <h2 id="articleDetailTitle" class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2"></h2>
             <p id="articleDetailSnippet" class="text-gray-700 dark:text-gray-300 mb-4"></p>
             <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Источник: <span id="articleDetailSource"></span> | Автор: <span id="articleDetailAuthor"></span> | Опубликовано: <span id="articleDetailDate"></span></p>
@@ -703,7 +730,7 @@
         // Full Article Detail Modal elements
         const articleDetailModal = document.getElementById('articleDetailModal');
         const closeArticleDetailModalButton = document.getElementById('closeArticleDetailModalButton');
-        const articleDetailImage = document.getElementById('articleDetailImage');
+        const articleDetailImageContainer = document.getElementById('articleDetailImageContainer'); // New container for image/placeholder
         const articleDetailTitle = document.getElementById('articleDetailTitle');
         const articleDetailSnippet = document.getElementById('articleDetailSnippet');
         const articleDetailSource = document.getElementById('articleDetailSource');
@@ -981,6 +1008,7 @@
             newsCard.style.setProperty('--animation-delay', `${index * 0.05}s`); // Staggered animation delay
 
             let imageHtml = '';
+            let placeholderText = 'Нет изображения';
             let placeholderSize = '600x400'; // Default placeholder size
 
             if (!isBookmarkOrHistory && currentPage === 1 && index === 0) {
@@ -1000,11 +1028,12 @@
                         <img src="${originalImageUrl}" 
                              alt="${article.title || 'News image'}" 
                              loading="lazy"
-                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image';" />
+                             onerror="this.onerror=null;this.src='https://placehold.co/${placeholderSize}/cccccc/333333?text=${encodeURIComponent(placeholderText)}';" />
                     </picture>
                 `;
             } else {
-                imageHtml = `<img src="https://placehold.co/${placeholderSize}/cccccc/333333?text=No+Image" alt="No image available" loading="lazy" />`;
+                // Directly use a placeholder div if no image URL
+                imageHtml = `<div class="placeholder-image" style="height: ${placeholderSize.split('x')[1]}px;">${placeholderText}</div>`;
             }
 
             const isBookmarked = bookmarkedArticles.some(a => a.url === article.url);
@@ -1137,9 +1166,34 @@
             // Add article to history
             addArticleToHistory(article);
 
-            // Populate modal content
-            articleDetailImage.src = article.image_url || `https://placehold.co/800x450/cccccc/333333?text=No+Image`;
-            articleDetailImage.alt = article.title || 'Изображение статьи';
+            // Clear previous image/placeholder
+            articleDetailImageContainer.innerHTML = ''; 
+
+            // Create image or placeholder for the modal
+            const modalPlaceholderText = 'Изображение недоступно';
+            if (article.image_url) {
+                const imgElement = document.createElement('img');
+                imgElement.src = article.image_url;
+                imgElement.alt = article.title || 'Изображение статьи';
+                imgElement.className = 'w-full h-auto rounded-lg mb-4';
+                imgElement.onerror = function() {
+                    // Fallback to a div placeholder if image fails to load in modal
+                    this.onerror = null; // Prevent infinite loop
+                    const placeholderDiv = document.createElement('div');
+                    placeholderDiv.className = 'placeholder-image w-full h-64 rounded-lg mb-4'; // Fixed height for modal placeholder
+                    placeholderDiv.textContent = modalPlaceholderText;
+                    articleDetailImageContainer.innerHTML = ''; // Clear failed img
+                    articleDetailImageContainer.appendChild(placeholderDiv);
+                };
+                articleDetailImageContainer.appendChild(imgElement);
+            } else {
+                const placeholderDiv = document.createElement('div');
+                placeholderDiv.className = 'placeholder-image w-full h-64 rounded-lg mb-4'; // Fixed height for modal placeholder
+                placeholderDiv.textContent = modalPlaceholderText;
+                articleDetailImageContainer.appendChild(placeholderDiv);
+            }
+
+            // Populate other modal content
             articleDetailTitle.textContent = article.title || 'Заголовок статьи';
             articleDetailSnippet.textContent = article.snippet || 'Описание статьи отсутствует.';
             articleDetailSource.textContent = article.source_title || 'Неизвестно';
