@@ -1034,14 +1034,15 @@
 
             try {
                 const urlParams = new URLSearchParams();
+                // Truncate query and author before appending to URL params
                 if (currentQuery) {
-                    urlParams.append('query', currentQuery);
+                    urlParams.append('query', currentQuery.substring(0, 200)); 
                 }
                 if (currentCategory) {
                     urlParams.append('category', currentCategory);
                 }
                 if (currentAuthor) {
-                    urlParams.append('author', currentAuthor);
+                    urlParams.append('author', currentAuthor.substring(0, 200)); 
                 }
                 urlParams.append('language', currentLanguage);
                 urlParams.append('page', currentPage);
@@ -1406,7 +1407,10 @@
             searchInput.value = '';
             currentAuthor = '';
             authorSearchInput.value = '';
-            currentCategory = '';
+            // Only reset currentCategory if a specific category button is not clicked
+            // This ensures that when a category button is clicked, it's not immediately reset
+            // by other filter changes.
+            // currentCategory = ''; // This line is removed/modified for category buttons
             fromDateInput.value = '';
             toDateInput.value = '';
             selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Keep saved sources
@@ -1416,7 +1420,12 @@
         // --- Event Listeners ---
         searchButton.addEventListener('click', () => {
             currentQuery = searchInput.value.trim();
-            resetAllFiltersExceptLanguageAndFavorites(); // Reset others
+            currentCategory = ''; // Reset category when searching
+            currentAuthor = ''; // Reset author when searching
+            fromDateInput.value = ''; // Reset date filters
+            toDateInput.value = '';
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Keep saved sources
+            updateActiveCategoryButton(currentCategory);
             renderPage('main');
         });
 
@@ -1428,7 +1437,12 @@
 
         authorSearchButton.addEventListener('click', () => {
             currentAuthor = authorSearchInput.value.trim();
-            resetAllFiltersExceptLanguageAndFavorites(); // Reset others
+            currentQuery = ''; // Reset query when searching by author
+            currentCategory = ''; // Reset category when searching by author
+            fromDateInput.value = ''; // Reset date filters
+            toDateInput.value = '';
+            selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Keep saved sources
+            updateActiveCategoryButton(currentCategory);
             renderPage('main');
         });
 
@@ -1440,12 +1454,18 @@
 
         // Date filter change listeners
         fromDateInput.addEventListener('change', () => {
-            resetAllFiltersExceptLanguageAndFavorites(); // Keep query if any, reset others
+            currentQuery = ''; // Reset query when changing date
+            currentAuthor = ''; // Reset author when changing date
+            currentCategory = ''; // Reset category when changing date
+            updateActiveCategoryButton(currentCategory);
             renderPage('main');
         });
 
         toDateInput.addEventListener('change', () => {
-            resetAllFiltersExceptLanguageAndFavorites(); // Keep query if any, reset others
+            currentQuery = ''; // Reset query when changing date
+            currentAuthor = ''; // Reset author when changing date
+            currentCategory = ''; // Reset category when changing date
+            updateActiveCategoryButton(currentCategory);
             renderPage('main');
         });
 
@@ -1460,7 +1480,10 @@
                 fromDateInput.value = fromDate.toISOString().split('T')[0];
                 toDateInput.value = today.toISOString().split('T')[0];
 
-                resetAllFiltersExceptLanguageAndFavorites(); // Keep query if any, reset others
+                currentQuery = ''; // Reset query
+                currentAuthor = ''; // Reset author
+                currentCategory = ''; // Reset category
+                updateActiveCategoryButton(currentCategory);
                 renderPage('main');
             });
         });
@@ -1469,7 +1492,7 @@
         languageSelect.addEventListener('change', () => {
             currentLanguage = languageSelect.value;
             localStorage.setItem('selectedLanguage', currentLanguage); // Save selected language
-            resetAllFiltersExceptLanguageAndFavorites(); // Reset others
+            // No need to reset other filters here, language can be combined
             renderPage('main');
         });
 
@@ -1477,7 +1500,11 @@
             if (event.target.closest('.category-button')) {
                 const button = event.target.closest('.category-button');
                 currentCategory = button.dataset.category;
-                resetAllFiltersExceptLanguageAndFavorites(); // Reset others
+                currentQuery = ''; // Reset query when category is selected
+                currentAuthor = ''; // Reset author when category is selected
+                fromDateInput.value = ''; // Reset date filters
+                toDateInput.value = '';
+                selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || []; // Keep saved sources
                 updateActiveCategoryButton(currentCategory);
                 renderPage('main');
             }
@@ -1546,9 +1573,7 @@
             applySavedTheme();
             // Set initial language select value based on localStorage or default
             languageSelect.value = currentLanguage; 
-            // Removed fetchSources() call here
-            // fetchSources(); // Fetch sources when page loads (for source selection and favorites)
-
+            
             // Load saved filters on startup
             const savedFilters = JSON.parse(localStorage.getItem('savedFilters'));
             if (savedFilters) {
