@@ -266,6 +266,10 @@
             border-color: rgba(255, 255, 255, 0.1);
             border-left-color: #63b3ed;
         }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
 
         /* Toast Notification Styles */
         .toast-notification {
@@ -630,7 +634,38 @@
         let currentLanguage = localStorage.getItem('selectedLanguage') || 'ru';
         let currentPage = 1;
         let totalResults = 0;
-        let allSources = [];
+        // Removed fetchSources() call and hardcoded allSources directly
+        let allSources = [
+            { id: 'lenta-ru', name: 'Lenta.ru', description: 'Российское интернет-издание' },
+            { id: 'rt', name: 'RT', description: 'Российский международный новостной телеканал' },
+            { id: 'ria-novosti', name: 'РИА Новости', description: 'Российское информационное агентство' },
+            { id: 'bbc-news', name: 'BBC News', description: 'British Broadcasting Corporation' },
+            { id: 'cnn', name: 'CNN', description: 'Cable News Network' },
+            { id: 'the-new-york-times', name: 'The New York Times', description: 'American daily newspaper' },
+            { id: 'the-guardian', name: 'The Guardian', description: 'British daily newspaper' },
+            { id: 'reuters', name: 'Reuters', description: 'International news agency' },
+            { id: 'kommersant', name: 'Коммерсантъ', description: 'Российская ежедневная газета' },
+            { id: 'izvestia', name: 'Известия', description: 'Российская общественно-политическая газета' },
+            { id: 'gazeta-ru', name: 'Газета.Ru', description: 'Российское интернет-издание' },
+            { id: 'rbc', name: 'РБК', description: 'Российский медиахолдинг' },
+            { id: 'vesti-ru', name: 'Вести.Ru', description: 'Российский новостной портал' },
+            { id: 'tass', name: 'ТАСС', description: 'Российское государственное информационное агентство' },
+            { id: 'interfax', name: 'Интерфакс', description: 'Российское информационное агентство' },
+            { id: 'washington-post', name: 'The Washington Post', description: 'American daily newspaper' },
+            { id: 'bloomberg', name: 'Bloomberg', description: 'Financial news and data' },
+            { id: 'forbes', name: 'Forbes', description: 'Business magazine' },
+            { id: 'techcrunch', name: 'TechCrunch', description: 'Technology news' },
+            { id: 'engadget', name: 'Engadget', description: 'Technology news and reviews' },
+            { id: 'the-verge', name: 'The Verge', description: 'Technology news' },
+            { id: 'wired', name: 'Wired', description: 'Technology and culture magazine' },
+            { id: 'national-geographic', name: 'National Geographic', description: 'Science, exploration, and culture' },
+            { id: 'science-alert', name: 'ScienceAlert', description: 'Science news' },
+            { id: 'espn', name: 'ESPN', description: 'Sports news' },
+            { id: 'bleacher-report', name: 'Bleacher Report', description: 'Sports news and analysis' },
+            // Добавьте больше источников по мере необходимости, убедившись, что их ID соответствуют формату
+            // source_name.lower().replace(' ', '-')
+        ];
+
         let selectedSourceIds = JSON.parse(localStorage.getItem('selectedSourceIds')) || [];
         let favoriteCategories = JSON.parse(localStorage.getItem('favoriteCategories')) || [];
         let favoriteSourceIds = JSON.parse(localStorage.getItem('favoriteSourceIds')) || [];
@@ -1106,24 +1141,7 @@
         /**
          * Fetches all available sources from the backend.
          */
-        async function fetchSources() {
-            try {
-                const response = await fetch(`${BACKEND_API_URL}/sources`);
-                if (!response.ok) {
-                    const errorText = await response.text();
-                    throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
-                }
-                allSources = await response.json();
-                // No need to display in modal immediately, will be called when modal opens
-            } catch (error) {
-                console.error("Error fetching sources:", error);
-                // Display error in the modal if it's open, otherwise just log
-                if (sourcesModal.classList.contains('show')) {
-                    sourcesListContainer.innerHTML = `<p class="text-red-500 dark:text-red-300">Не удалось загрузить источники: ${error.message}</p>`;
-                }
-                showToast(`Ошибка загрузки источников: ${error.message}`, 'error');
-            }
-        }
+        // Removed fetchSources() function as sources are now hardcoded
 
         /**
          * Displays sources as checkboxes in the modal.
@@ -1526,7 +1544,8 @@
             applySavedTheme();
             // Set initial language select value based on localStorage or default
             languageSelect.value = currentLanguage; 
-            fetchSources(); // Fetch sources when page loads (for source selection and favorites)
+            // Removed fetchSources() call here
+            // fetchSources(); // Fetch sources when page loads (for source selection and favorites)
 
             // Load saved filters on startup
             const savedFilters = JSON.parse(localStorage.getItem('savedFilters'));
@@ -1575,5 +1594,6 @@
     </script>
 </body>
 </html>
+
 
 
