@@ -6,11 +6,11 @@ const urlsToCache = [
     '/index.html',
     '/style.css',
     '/script.js',
-    '/NSA.jpg', // Логотип
-    'https://cdn.tailwindcss.com',
+    '/NSA.jpg', // Логотип (убедитесь, что этот файл существует!)
     'https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
     'https://cdn.jsdelivr.net/npm/webp-polyfill@1.0.1/webp-polyfill.min.js',
+    // 'https://cdn.tailwindcss.com', <-- УДАЛЕНО: Этот URL вызывает CORS ошибку при кэшировании Service Worker'ом
     // Добавьте сюда другие важные статические ресурсы, если они есть
 ];
 
@@ -25,6 +25,7 @@ self.addEventListener('install', event => {
             })
             .catch(error => {
                 console.error('Service Worker: Ошибка при добавлении в кэш:', error);
+                // Продолжаем работу, даже если некоторые файлы не удалось добавить в кэш
             })
     );
 });
@@ -51,14 +52,12 @@ self.addEventListener('fetch', event => {
     // Пропускаем запросы к API, если они не должны кэшироваться Service Worker'ом
     if (event.request.url.startsWith('https://shoxbro2007.pythonanywhere.com/api')) {
         // Для API запросов можно использовать стратегию "Network First" или "Stale-While-Revalidate"
-        // Здесь используется "Network First" для свежих данных, но без кэширования ответов API.
-        // Кэширование ответов API управляется на бэкенде (news_backend.py).
+        // Здесь используется "Network First" для свежих данных.
         event.respondWith(fetch(event.request).catch(error => {
             console.error('Service Worker: Ошибка при запросе API:', error);
             // Если сеть недоступна, можно отдать заглушку или кэшированные данные, если они есть.
             // Для новостей это сложнее, т.к. они динамические.
-            // В данном случае, если API не доступно, фронтенд покажет ошибку,
-            // а Service Worker не будет пытаться кэшировать API ответы.
+            // В данном случае, если API не доступно, фронтенд покажет ошибку.
             throw error; // Передаем ошибку дальше, чтобы фронтенд мог ее обработать
         }));
         return;
@@ -80,7 +79,9 @@ self.addEventListener('fetch', event => {
                         // Кэшируем новый ресурс для будущего использования
                         return caches.open(CACHE_NAME).then(cache => {
                             // Не кэшируем ответы, которые не являются успешными (например, 404, 500)
-                            if (networkResponse.ok || networkResponse.type === 'opaque') { // 'opaque' для сторонних ресурсов без CORS
+                            // И не кэшируем непрозрачные ответы (opaque responses), которые могут вызывать CORS ошибки
+                            // (например, ресурсы с других доменов без CORS заголовков).
+                            if (networkResponse.ok || (networkResponse.type === 'opaque' && networkResponse.status === 200)) { 
                                 cache.put(event.request, networkResponse.clone());
                             }
                             return networkResponse;
