@@ -36,9 +36,6 @@
     <!-- Link to external CSS file -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Яндекс.Директ/РСЯ: Разместите основной скрипт РСЯ здесь -->
-    <!-- Пример: <script async src="https://yandex.ru/ads/system/context.js"></script> -->
-
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
         (function(m,e,t,r,i,k,a){
@@ -68,6 +65,11 @@
 
     <!-- Disqus Comment Count Script -->
     <script id="dsq-count-scr" src="//studnews-ru.disqus.com/count.js" async></script>
+
+    <!-- SCRIPT FOR YANDEX ADS (РСЯ) -->
+    <!-- Place this script in the <head> or right before the closing </body> tag. -->
+    <!-- It must be loaded before any ad blocks are initialized. -->
+    <script async src="https://yandex.ru/ads/system/context.js"></script>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 transition-colors duration-300">
 
@@ -197,6 +199,17 @@
                     Любимые источники: Нет
                 </div>
             </div>
+
+            <!-- РСЯ Ad Block (Main Page - middle) -->
+            <!-- Вам нужно вставить сюда div-контейнер и скрипт инициализации, полученные из Яндекс.Директ. -->
+            <!-- Пример: -->
+            <div class="w-full max-w-xl my-10 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md flex justify-center items-center text-center">
+                <div id="yandex_rtb_R-A-XXXXXX-Y1" class="w-full">
+                    <!-- Здесь будет загружена реклама РСЯ -->
+                </div>
+            </div>
+            <!-- КОНЕЦ ПРИМЕРА РСЯ БЛОКА -->
+
 
             <div id="loadingIndicator" class="flex flex-col items-center justify-center py-16">
                 <div class="loading-spinner mb-6"></div>
@@ -333,5 +346,21 @@
     <!-- Link to external JavaScript file -->
     <!-- We'll link to our service worker here for PWA functionality -->
     <script type="module" src="script.js"></script>
+
+    <!-- ИНИЦИАЛИЗАЦИЯ РСЯ БЛОКА (Main Page - middle) -->
+    <!-- Этот скрипт должен идти после div-контейнера для рекламного блока. -->
+    <!-- Вам нужно вставить сюда ТОТ ЖЕ скрипт, который вы получите из Яндекс.Директ. -->
+    <!-- Пример: -->
+    <script type="text/javascript">
+        window.yaContextCb = window.yaContextCb || [];
+        window.yaContextCb.push(function(){
+            Ya.Context.AdvManager.render({
+                blockId: 'R-A-XXXXXX-Y1', // ЗАМЕНИТЕ ЭТОТ ID НА СВОЙ!
+                renderTo: 'yandex_rtb_R-A-XXXXXX-Y1'
+            })
+        });
+    </script>
+    <!-- КОНЕЦ ПРИМЕРА ИНИЦИАЛИЗАЦИИ РСЯ БЛОКА -->
+
 </body>
 </html>
