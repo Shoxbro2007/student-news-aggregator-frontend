@@ -1,5 +1,5 @@
 // Service Worker для поддержки PWA (Progressive Web App)
-const CACHE_NAME = 'student-news-cache-v1';
+const CACHE_NAME = 'student-news-cache-v1'; // Увеличивайте версию кэша при каждом значительном изменении статики
 // Файлы, которые будут кэшироваться при установке Service Worker
 const urlsToCache = [
     '/', // Главная страница
@@ -7,11 +7,11 @@ const urlsToCache = [
     '/style.css',
     '/script.js',
     '/NSA.jpg', // Логотип (убедитесь, что этот файл существует!)
+    '/NSA.webp', // WebP версия логотипа (убедитесь, что этот файл существует!)
     'https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@400;500;600;700&display=swap',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css',
-    'https://cdn.jsdelivr.net/npm/webp-polyfill@1.0.1/webp-polyfill.min.js',
-    // 'https://cdn.tailwindcss.com', <-- УДАЛЕНО: Этот URL вызывает CORS ошибку при кэшировании Service Worker'ом
-    // Добавьте сюда другие важные статические ресурсы, если они есть
+    // webp-polyfill.min.js и cdn.tailwindcss.com были удалены из urlsToCache в предыдущих версиях
+    // так как они вызывали 404 или CORS ошибки при кэшировании SW
 ];
 
 // Установка Service Worker и кэширование статических ресурсов
@@ -21,13 +21,25 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: Кэширование оболочки приложения');
-                return cache.addAll(urlsToCache);
+                // Используем Promise.allSettled для обработки случаев,
+                // когда некоторые ресурсы могут не загрузиться (например, если нет интернета)
+                return Promise.allSettled(urlsToCache.map(url => cache.add(url)));
+            })
+            .then(results => {
+                results.forEach(result => {
+                    if (result.status === 'rejected') {
+                        console.warn(`Service Worker: Не удалось кэшировать ${result.reason.url || 'ресурс'}:`, result.reason);
+                    }
+                });
+                console.log('Service Worker: Кэширование оболочки приложения завершено (с возможными предупреждениями).');
             })
             .catch(error => {
-                console.error('Service Worker: Ошибка при добавлении в кэш:', error);
-                // Продолжаем работу, даже если некоторые файлы не удалось добавить в кэш
+                console.error('Service Worker: Критическая ошибка при открытии кэша или добавлении ресурсов:', error);
             })
     );
+    // Принудительная активация нового Service Worker сразу после установки,
+    // чтобы он не ждал закрытия всех вкладок со старой версией.
+    self.skipWaiting();
 });
 
 // Активация Service Worker и удаление старых кэшей
@@ -43,27 +55,38 @@ self.addEventListener('activate', event => {
                     }
                 })
             );
+        }).then(() => {
+            // Утверждаем контроль над всеми клиентами (вкладками) сразу после активации
+            return self.clients.claim();
         })
     );
 });
 
 // Перехват сетевых запросов
 self.addEventListener('fetch', event => {
-    // Пропускаем запросы к API, если они не должны кэшироваться Service Worker'ом
-    if (event.request.url.startsWith('https://shoxbro2007.pythonanywhere.com/api')) {
-        // Для API запросов можно использовать стратегию "Network First" или "Stale-While-Revalidate"
-        // Здесь используется "Network First" для свежих данных.
+    // 1. Исключаем все POST-запросы из кэширования
+    // 2. Исключаем запросы к API и аналитике
+    const isAnalyticsOrApi = 
+        event.request.url.startsWith('https://shoxbro2007.pythonanywhere.com/api') || 
+        event.request.url.includes('gnews.io') ||
+        event.request.url.includes('disqus.com') ||
+        event.request.url.includes('mc.yandex.ru') || // Яндекс.Метрика
+        event.request.url.includes('googletagmanager.com') || // Google Tag Manager (который грузит GA4)
+        event.request.url.includes('google-analytics.com') || // Google Analytics напрямую
+        event.request.url.includes('yandex.ru/ads'); // Яндекс.Директ/РСЯ
+
+    if (event.request.method !== 'GET' || isAnalyticsOrApi) {
+        // Для не-GET запросов, или запросов к API/аналитике:
+        // Просто отправляем запрос в сеть, не пытаясь кэшировать.
+        // Ошибки CORS/Network для этих запросов будут обрабатываться на уровне фронтенда.
         event.respondWith(fetch(event.request).catch(error => {
-            console.error('Service Worker: Ошибка при запросе API:', error);
-            // Если сеть недоступна, можно отдать заглушку или кэшированные данные, если они есть.
-            // Для новостей это сложнее, т.к. они динамические.
-            // В данном случае, если API не доступно, фронтенд покажет ошибку.
+            console.error('Service Worker: Ошибка при запросе (не кэшируется):', event.request.url, error);
             throw error; // Передаем ошибку дальше, чтобы фронтенд мог ее обработать
         }));
         return;
     }
 
-    // Для остальных запросов (статические ресурсы) используем стратегию "Cache First"
+    // Для остальных GET-запросов (статические ресурсы): используем стратегию "Cache First"
     event.respondWith(
         caches.match(event.request)
             .then(response => {
@@ -72,24 +95,25 @@ self.addEventListener('fetch', event => {
                     console.log('Service Worker: Обслуживание из кэша:', event.request.url);
                     return response;
                 }
+                
                 // Если ресурс не найден в кэше, запрашиваем его из сети
                 console.log('Service Worker: Запрос из сети:', event.request.url);
                 return fetch(event.request)
                     .then(networkResponse => {
-                        // Кэшируем новый ресурс для будущего использования
-                        return caches.open(CACHE_NAME).then(cache => {
-                            // Не кэшируем ответы, которые не являются успешными (например, 404, 500)
-                            // И не кэшируем непрозрачные ответы (opaque responses), которые могут вызывать CORS ошибки
-                            // (например, ресурсы с других доменов без CORS заголовков).
-                            if (networkResponse.ok || (networkResponse.type === 'opaque' && networkResponse.status === 200)) { 
-                                cache.put(event.request, networkResponse.clone());
-                            }
-                            return networkResponse;
-                        });
+                        // Кэшируем новый ресурс для будущего использования,
+                        // только если ответ успешный (2xx) или непрозрачный ('opaque')
+                        // и относится к статическому контенту.
+                        if (networkResponse.ok || networkResponse.type === 'opaque') {
+                            return caches.open(CACHE_NAME).then(cache => {
+                                cache.put(event.request, networkResponse.clone()); // Клонируем ответ, т.к. он потоковый
+                                return networkResponse;
+                            });
+                        }
+                        return networkResponse; // Для неуспешных ответов просто возвращаем ответ без кэширования
                     })
                     .catch(error => {
-                        console.error('Service Worker: Ошибка при запросе из сети:', error);
-                        // Можно показать офлайн-страницу, если запрос не удался
+                        console.error('Service Worker: Ошибка при запросе из сети (статический ресурс):', event.request.url, error);
+                        // Если очень нужно, можно отдать офлайн-страницу, если запрос не удался
                         // return caches.match('/offline.html');
                         throw error;
                     });
