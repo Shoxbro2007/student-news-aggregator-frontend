@@ -7,12 +7,12 @@
     
     <!-- SEO Meta Tags (initial values, will be dynamically updated by JS) -->
     <meta name="description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
-    <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт, здоровье, бизнес, развлечения, агрегатор новостей">
+    <meta name="keywords" content="новости для студентов, студенческие новости, образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta name="author" content="Student News Aggregator">
 
     <!-- Open Graph / Social Media Meta Tags (initial values, will be dynamically updated by JS) -->
     <meta property="og:title" content="Student News Aggregator | Актуальные новости для студентов">
-    <meta property="og:description" content="Будьте в курсе последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
+    <meta property="og:description" content="Будьте в курсу последних новостей для студентов: образование, стипендии, карьера, университет, технологии, наука, спорт и многое другое. Ваш агрегатор студенческих новостей.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://studnews.ru/"> 
     <meta property="og:image" content="https://studnews.ru/NSA.jpg"> 
@@ -66,10 +66,9 @@
     <!-- Disqus Comment Count Script -->
     <script id="dsq-count-scr" src="//studnews-ru.disqus.com/count.js" async></script>
 
-    <!-- SCRIPT FOR YANDEX ADS (РСЯ) -->
-    <!-- Place this script in the <head> or right before the closing </body> tag. -->
-    <!-- It must be loaded before any ad blocks are initialized. -->
-    <script async src="https://yandex.ru/ads/system/context.js"></script>
+    <!-- SCRIPT FOR YANDEX ADS (РСЯ) - Основной скрипт -->
+    <script>window.yaContextCb=window.yaContextCb||[]</script>
+    <script src="https://yandex.ru/ads/system/context.js" async></script>
 </head>
 <body class="min-h-screen flex flex-col items-center py-8 px-4 transition-colors duration-300">
 
@@ -200,15 +199,13 @@
                 </div>
             </div>
 
-            <!-- РСЯ Ad Block (Main Page - middle) -->
-            <!-- Вам нужно вставить сюда div-контейнер и скрипт инициализации, полученные из Яндекс.Директ. -->
-            <!-- Пример: -->
+            <!-- Yandex.RTB Ad Block (Main Page - middle) -->
             <div class="w-full max-w-xl my-10 p-4 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md flex justify-center items-center text-center">
-                <div id="yandex_rtb_R-A-XXXXXX-Y1" class="w-full">
+                <div id="yandex_rtb_R-A-16496106-1" class="w-full">
                     <!-- Здесь будет загружена реклама РСЯ -->
                 </div>
             </div>
-            <!-- КОНЕЦ ПРИМЕРА РСЯ БЛОКА -->
+            <!-- КОНЕЦ Yandex.RTB Ad Block -->
 
 
             <div id="loadingIndicator" class="flex flex-col items-center justify-center py-16">
@@ -347,20 +344,17 @@
     <!-- We'll link to our service worker here for PWA functionality -->
     <script type="module" src="script.js"></script>
 
-    <!-- ИНИЦИАЛИЗАЦИЯ РСЯ БЛОКА (Main Page - middle) -->
+    <!-- ИНИЦИАЛИЗАЦИЯ Yandex.RTB БЛОКА -->
     <!-- Этот скрипт должен идти после div-контейнера для рекламного блока. -->
-    <!-- Вам нужно вставить сюда ТОТ ЖЕ скрипт, который вы получите из Яндекс.Директ. -->
-    <!-- Пример: -->
     <script type="text/javascript">
-        window.yaContextCb = window.yaContextCb || [];
-        window.yaContextCb.push(function(){
+        window.yaContextCb.push(() => {
             Ya.Context.AdvManager.render({
-                blockId: 'R-A-XXXXXX-Y1', // ЗАМЕНИТЕ ЭТОТ ID НА СВОЙ!
-                renderTo: 'yandex_rtb_R-A-XXXXXX-Y1'
+                "blockId": "R-A-16496106-1", 
+                "renderTo": "yandex_rtb_R-A-16496106-1"
             })
         });
     </script>
-    <!-- КОНЕЦ ПРИМЕРА ИНИЦИАЛИЗАЦИИ РСЯ БЛОКА -->
+    <!-- КОНЕЦ ИНИЦИАЛИЗАЦИИ Yandex.RTB БЛОКА -->
 
 </body>
 </html>
