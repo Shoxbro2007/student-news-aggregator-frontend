@@ -336,6 +336,9 @@ function createImageHtml(article, index, isBookmarkOrHistory) {
         placeholderHeight = '220px';
     }
 
+    // WebP Implementation: Provide .webp source if available, otherwise fallback to original image.
+    // The image_url from the backend is assumed to be the original (e.g., .jpg, .png).
+    // We assume there's a corresponding .webp version available at the same path/name.
     const webpImageUrl = article.image_url ? article.image_url.replace(/\.(jpg|jpeg|png)$/i, '.webp') : null;
     const originalImageUrl = article.image_url;
 
@@ -1241,6 +1244,23 @@ scrollToTopBtn.addEventListener('click', () => {
     document.body.scrollTop = 0; 
     document.documentElement.scrollTop = 0; 
 });
+
+// --- PWA: Service Worker Registration ---
+// Проверяем поддержку Service Workers браузером
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+                console.log('Service Worker зарегистрирован успешно:', registration);
+                showToast('Приложение готово к работе в офлайн режиме!');
+            })
+            .catch(error => {
+                console.error('Ошибка регистрации Service Worker:', error);
+                showToast('Не удалось зарегистрировать Service Worker. Офлайн режим может быть недоступен.', 'error');
+            });
+    });
+}
+
 
 // --- Initial Load and Saved Filters ---
 window.onload = () => {

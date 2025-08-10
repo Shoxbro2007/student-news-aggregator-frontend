@@ -74,7 +74,13 @@
     <header class="w-full max-w-4xl text-center mb-12 relative">
         <div class="header-content">
             <!-- Your Profile Logo (NSA.jpg) -->
-            <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-24 w-24 rounded-full shadow-lg transition-colors duration-300">
+            <!-- WebP Implementation: Using <picture> tag for optimal image format delivery -->
+            <picture>
+                <!-- Source for WebP image, browsers that support WebP will load this first -->
+                <source srcset="NSA.webp" type="image/webp">
+                <!-- Fallback for browsers that do not support WebP -->
+                <img id="logo" src="NSA.jpg" alt="Ваш логотип SNA" class="h-24 w-24 rounded-full shadow-lg transition-colors duration-300">
+            </picture>
             <div>
                 <h1 class="main-title mb-2">Главные новости для студентов</h1>
                 <p class="subtitle">Будьте в курсе последних событий, советов и возможностей!</p>
@@ -325,6 +331,7 @@
     <div id="toastContainer" class="toast-notification"></div>
 
     <!-- Link to external JavaScript file -->
+    <!-- We'll link to our service worker here for PWA functionality -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
